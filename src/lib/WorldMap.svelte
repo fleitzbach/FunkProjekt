@@ -41,7 +41,7 @@
 				panY: 'rotateY',
 				projection: am5map.geoOrthographic(),
 				maxZoomLevel: 500,
-				minZoomLevel: 2,
+				minZoomLevel: 1,
 				maxPanOut: 0.5
 			})
 		);
@@ -55,6 +55,12 @@
 				geoJSON: am5geodata_worldHigh
 			})
 		);
+		let graticuleSeries = chart.series.unshift(am5map.GraticuleSeries.new(root, {}));
+
+		graticuleSeries.mapLines.template.setAll({
+			stroke: am5.color(0x000000),
+			strokeOpacity: 0.1
+		});
 
 		geoCircle = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
 
@@ -66,7 +72,7 @@
 		// https://www.amcharts.com/docs/v5/charts/map-chart/map-point-series/
 		pointSeries = chart.series.push(
 			am5map.ClusteredPointSeries.new(root, {
-				minDistance: 0,
+				minDistance: 5,
 				scatterDistance: 1,
 				scatterRadius: 1,
 				stopClusterZoom: 0.9
@@ -132,7 +138,7 @@
 				radius: 6,
 				tooltipY: 0,
 				fill: am5.color(0xff8c00),
-				tooltipText: '{name}\n\n{id}\n{latitude}, {longitude}'
+				tooltipText: '{name}\n\n{id}\n{latitude}, {longitude}\n{distance}'
 			});
 
 			return am5.Bullet.new(root, {
@@ -153,9 +159,12 @@
 		if (lat != null && long != null) {
 			// chart.zoomToGeoPoint({ longitude: long, latitude: lat }, 6);
 
-			let geoCirclePolygon = am5map.getGeoCircle({ latitude: long, longitude: lat }, maxDistance / 110)
+			let geoCirclePolygon = am5map.getGeoCircle(
+				{ latitude: lat, longitude: long },
+				maxDistance / 110
+			);
 
-			geoCircle.data.setAll([{geometry: geoCirclePolygon}]);
+			geoCircle.data.setAll([{ geometry: geoCirclePolygon }]);
 			geoCircle.mapPolygons.template.setAll({
 				stroke: am5.color(0xffffff),
 				strokeWidth: 2,
@@ -165,15 +174,16 @@
 			let closestPoint: {};
 			let closestDistance = Infinity;
 			let nearbyPoints = points.filter((point) => {
-				const distance = calculateDistance(lat, long, point.longitude, point.latitude);
+				const distance = calculateDistance(lat, long, point.latitude, point.longitude);
 				return distance <= maxDistance;
 			});
 
 			nearbyPoints = nearbyPoints.map((point) => {
 				return {
-					geometry: { type: 'Point', coordinates: [point.longitude, point.latitude] },
+					geometry: { type: 'Point', coordinates: [ point.longitude, point.latitude,] },
 					id: point.id,
-					name: point.name
+					name: point.name,
+					distance: calculateDistance(lat, long, point.latitude, point.longitude)
 				};
 			});
 
@@ -186,8 +196,8 @@
 <!-- WorldMap.svelte -->
 
 <div class="map" bind:this={chartdiv} id="chartdiv"></div>
-<input type="text" bind:this={longitude} value="48" />
-<input type="text" bind:this={latitude} value="9" />
+<input type="text" bind:this={latitude} value="48" />
+<input type="text" bind:this={longitude} value="9" />
 <input type="range" bind:this={radius} id="radius" min="1" max="1000" />
 <button type="button" on:click={search}>search</button>
 
