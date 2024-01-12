@@ -8,6 +8,10 @@
 	let chartdiv;
 	let longitude
 	let latitude
+	let points;
+	let radius
+	let pointSeries
+	let chart
 	export let pointsPromise: Promise<
 		Array<{ id: string; latitude: number; longitude: number; name: string }>
 	>;
@@ -23,13 +27,14 @@
 
 		// Create the map chart
 		// https://www.amcharts.com/docs/v5/charts/map-chart/
-		let chart = root.container.children.push(
+		chart = root.container.children.push(
 			am5map.MapChart.new(root, {
 				panX: 'rotateX',
 				panY: 'translateY',
 				projection: am5map.geoMercator(),
 				maxZoomLevel: 500,
 				minZoomLevel: 0.1,
+				maxPanOut: 0,
 			})
 		);
 
@@ -49,7 +54,7 @@
 
 		// Create point series for markers
 		// https://www.amcharts.com/docs/v5/charts/map-chart/map-point-series/
-		let pointSeries = chart.series.push(am5map.ClusteredPointSeries.new(root, {}));
+		pointSeries = chart.series.push(am5map.ClusteredPointSeries.new(root, {}));
 
 		// Set clustered bullet
 		// https://www.amcharts.com/docs/v5/charts/map-chart/clustered-point-series/#Group_bullet
@@ -118,46 +123,56 @@
 			});
 		});
 
-		const referencePoint = { latitude: 40.7128, longitude: -74.006 }; // Example: New York City
 		const maxDistance = 100; // Maximum distance in kilometers
+		
+		points = await pointsPromise;
+		
+		// Make stuff animate on load
+		chart.appear(1000, 100);
+		
+	});
+	
+	function search(e) {
+		let lat = latitude.value
+		let long = longitude.value
+		let maxDistance = radius.value
+		console.log(lat, long)
+		
+		chart.zoomToGeoPoint({ lat, long }, 5);
 
-		
-		let points = await pointsPromise;
-		console.log(points);
-		
-		const nearbyPoints = points.filter((point) => {
+		let nearbyPoints = points.filter((point) => {
+
 			const distance = calculateDistance(
-				referencePoint.latitude,
-				referencePoint.longitude,
+				lat,
+				long,
 				point.latitude,
 				point.longitude
 			);
 			return distance <= maxDistance;
 		});
 
-		let count = 0;
-		for (var i = 0; i < nearbyPoints.length; i++) {
-			let point = nearbyPoints[i];
-			if (point.id.startsWith('')) {
-				addPoint(point.longitude, point.latitude, point.name);
-				count++;
-				console.log(point.name);
+		console.log(nearbyPoints)
+		nearbyPoints = nearbyPoints.map((point) => {
+			return {
+				geometry: { type: 'Point', coordinates: [point.longitude, point.latitude] },
+				title: point.name
 			}
-		}
-		console.log(count);
-
-		function addPoint(longitude: number, latitude: number, title: string) {
-			pointSeries.data.push({
-				geometry: { type: 'Point', coordinates: [longitude, latitude] },
-				title: title
-			});
-		}
-
-		// Make stuff animate on load
-		chart.appear(1000, 100);
-
-	});
-	function search(e) {
+		})
+		
+		pointSeries.data.setAll(nearbyPoints)
+		// let count = 0;
+		// for (var i = 0; i < 999; i++) {
+			// let point = nearbyPoints[i];
+			// if (point.id.startsWith('')) {
+				// addPoint(point.longitude, point.latitude, point.name);
+				// count++;
+			// }
+		// }
+		// console.log(count);
+	
+		// function addPoint(longitude: number, latitude: number, title: string) {
+		// 	pointSeries.data.push();
+		// }
 	}
 </script>
 
@@ -165,7 +180,10 @@
 
 <div class="map" bind:this={chartdiv} id="chartdiv"></div>
 <input type="text" bind:this={longitude}>
-<input type="text" bind:this={latitude} on:change={search}>
+<input type="text" bind:this={latitude}>
+<input type="range" bind:this={radius} id="radius" min="1" max="1000">
+<button type='button' on:click={search}>search</button>
+
 <style>
 	.map {
 		width: 100%;
