@@ -33,14 +33,14 @@ async function streamAndParseData(url: string): Promise<any[]> {
 			let chunkLines = buffer.substring(0, boundary).split('\n');
 			buffer = buffer.substring(boundary + 1);
             //console.log(chunkLines)
-            let row: { id: string; latitude: number; longitude: number; name: string } = {};
+            let row: { id: string; latitude: number; longitude: number; name: string } = {id: '', latitude: 0, longitude: 0, name: ''};
 			chunkLines.forEach((line) => {
 				row.id = line.slice(0, 11);
 				row.latitude = parseFloat(line.slice(12, 20));
 				row.longitude = parseFloat(line.slice(21, 30));
-				row.name = line.slice(41, 71);
+				row.name = line.slice(41, 71).trim();
 				parsedLines.push(row);
-                row = {}
+                row = {id: '', latitude: 0, longitude: 0, name: ''}
 			});
 		});
 
