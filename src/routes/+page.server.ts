@@ -11,7 +11,6 @@ export async function load() {
 		// Return the parsed data
 		return {
 			pointsPromise: parsedDataPromise,
-			test: 'test'
 		};
 	} catch (error) {
 		console.error('Error loading data:', error);

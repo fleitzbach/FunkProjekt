@@ -6,8 +6,7 @@
 </script>
 
 <main>
-  <WorldMap {pointsPromise} />‚
-  { data.test }
+  <WorldMap {pointsPromise} />
 </main>
 
 <style>
