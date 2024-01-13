@@ -1,12 +1,14 @@
 <!-- index.svelte -->
 <script>
   import WorldMap from '$lib/WorldMap.svelte';
+  import WorldMapLeaflet from '$lib/WorldMapLeaflet.svelte';
   export let data;
   let pointsPromise = data.pointsPromise
+  export const ssr = false;
 </script>
 
 <main>
-  <WorldMap {pointsPromise} />
+  <WorldMapLeaflet {pointsPromise} />
 </main>
 
 <style>

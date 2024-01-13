@@ -171,6 +171,9 @@
 				fillOpacity: 0.5
 			});
 
+			geoCircle.zoomToDataItem(geoCircle.mapPolygons)
+			console.log(geoCircle.chart)
+
 			let closestPoint: {};
 			let closestDistance = Infinity;
 			let nearbyPoints = points.filter((point) => {
@@ -198,7 +201,7 @@
 <div class="map" bind:this={chartdiv} id="chartdiv"></div>
 <input type="text" bind:this={latitude} value="48" />
 <input type="text" bind:this={longitude} value="9" />
-<input type="range" bind:this={radius} id="radius" min="1" max="1000" />
+<input type="range" bind:this={radius} id="radius" min="1" max="100" />
 <button type="button" on:click={search}>search</button>
 
 <style>
