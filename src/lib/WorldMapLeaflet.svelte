@@ -153,26 +153,31 @@
 </script>
 
 <div class="flex flex-row h-full">
-	<div class="p-5 flex flex-col gap-2 items-baseline grow max-w-[300px]">
-		<Label for="coordinates" class='font-semibold'>coordinates</Label>
-		<div class="rounded-md border border-input" id='coordinates'>
-			<Input
+	<div class="p-5 flex flex-col gap-5 items-baseline grow max-w-[300px] w-full">
+		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for Stations</h3>
+		<div class='w-full'>
+			<Label for="coordinates" class="font-semibold">Coordinates</Label>
+			<div class="rounded-md border border-input" id="coordinates">
+				<Input
 				type="text"
 				bind:value={latitude}
 				placeholder="Latitude"
 				class="rounded-none border-none"
-			/>
-			<Separator class="h-[.5px]"></Separator>
-			<Input
+				/>
+				<Separator class="h-[.5px]"></Separator>
+				<Input
 				type="text"
 				bind:value={longitude}
 				placeholder="Longitude"
 				class="rounded-none border-none"
-			/>
+				/>
+			</div>
 		</div>
-		<Label for="radius" class='font-semibold'>Radius</Label>
-		<Slider bind:value={radius} id="radius" class="py-3" />
-		<Button type="button" on:click={search}>search</Button>
+		<div class='w-full'>
+			<Label for="radius" class="font-semibold">Radius</Label>
+			<Slider bind:value={radius} id="radius" class="py-3" />
+		</div>
+		<Button type="button" on:click={search}>Search</Button>
 	</div>
 	<div id="map" class="h-full w-full outline-none" use:mapAction></div>
 </div>
