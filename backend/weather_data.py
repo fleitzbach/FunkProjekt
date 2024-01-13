@@ -2,14 +2,103 @@ import requests
 import gzip
 from io import BytesIO
 import pandas as pd
+from datetime import datetime
 
-# URL zur gz-Datei
-url_weather_data = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/ACW00011604.csv.gz"
+def get_data_from_id(id:str) -> pd.DataFrame:
+    """gets Data from a given id
+    
+    Keyword arguments:
+    id
+    Return: df with date, element and data_value
+    """
+    
+    # URL zur gz-Datei
+    url_weather_data = f"https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/{id}.csv.gz"
 
-response = requests.get(url_weather_data)
-compressed_file = BytesIO(response.content)
-decompressed_file = gzip.open(compressed_file, 'rt')
+    response = requests.get(url_weather_data)
+    compressed_file = BytesIO(response.content)
+    decompressed_file = gzip.open(compressed_file, 'rt')
 
-df = pd.read_csv(decompressed_file, header=None)
+    df = pd.read_csv(decompressed_file, header=None, names=['id', 'date', 'element', 'data_value','m-flag', 'q-flag', 's-flag', 'obs-time'])
+    df = df.loc[(df['element'] == 'TMAX') | (df['element'] == 'TMIN')]
+    df = df[['date', 'element', 'data_value']]
+    df['data_value'] = df['data_value'].apply(lambda x: x / 10)
 
-print(df)
+    df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
+
+    return df
+
+def filter_data(df: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
+    """filters the data from a given df
+    
+    Keyword arguments:
+    df
+    start
+    end
+    Return: df with date, element and data_value
+    """
+
+    start = datetime.strptime(start, '%Y-%m-%d')
+    end = datetime.strptime(end, '%Y-%m-%d')
+
+    df = df.loc[(df['date'] >= start) & (df['date'] <= end)]
+    return df
+
+def get_season(date):
+    year = str(date.year)
+    seasons = {'spring': pd.date_range(start='21/03/'+year, end='20/06/'+year),
+               'summer': pd.date_range(start='21/06/'+year, end='22/09/'+year),
+               'autumn': pd.date_range(start='23/09/'+year, end='20/12/'+year)}
+    if date in seasons['spring']:
+        return 'spring'
+    if date in seasons['summer']:
+        return 'summer'
+    if date in seasons['autumn']:
+        return 'autumn'
+    else:
+        return 'winter'
+
+def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
+    """calculates the mean of the data from a given df
+    
+    Keyword arguments:
+    df
+    start
+    end
+    rythm
+    Return: df with date, element and data_value
+    """
+
+    if rythm == 'year':
+        df = df.groupby(df['date'].dt.year).mean().reset_index()
+    elif rythm == 'month':
+        df = df.groupby(df['date'].dt.month).mean().reset_index()
+    elif rythm == 'day':
+        df = df.groupby(df['date'].dt.day).mean().reset_index()
+    elif rythm == 'season':
+        df['season'] = df['date'].map(get_season)
+        df = df.groupby('season').mean().reset_index()
+    else:
+        return 'Rythm not found'
+    
+    return df
+
+def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
+    """gets the weather data from a given id
+    
+    Keyword arguments:
+    id
+    start
+    end
+    rythm
+    Return: df with date, element and data_value
+    """
+
+    df = get_data_from_id(id)
+    df = filter_data(df, start, end)
+    df = calc_mean(df, rythm)
+
+    return df
+
+if __name__ == '__main__':
+    print(get_weather_data('USW00094728', '2020-01-01', '2020-12-31', 'season'))
