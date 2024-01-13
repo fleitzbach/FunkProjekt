@@ -43,14 +43,16 @@
 
 	function onMapClick(e) {
 		circle.setLatLng(e.latlng);
+        latitude.value = e.latlng[0]
+        longitude.value = e.latlng[1]
 	}
 
 	function dataLoaded() {
 		console.log('data loaded');
 	}
 
-	function renderPopupComponent(name) {
-		const { html } = PopupComponent.render({ name });
+	function renderMarkerPopup(name) {
+		const { html } = MarkerPopup.render({ name });
 		return html;
 	}
 
@@ -69,7 +71,7 @@
 
 		//circle.bindOverla(circlePopup);
 
-		//map.on('click', onMapClick);
+		map.on('click', onMapClick);
 
 		markers = L.markerClusterGroup({
 			spiderfyOnMaxZoom: false,
