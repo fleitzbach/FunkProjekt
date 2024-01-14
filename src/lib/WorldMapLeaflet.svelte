@@ -15,6 +15,9 @@
 	import * as HoverCard from '$lib/components/ui/hover-card';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import SliderWithInput from '$lib/components/SliderWithInput.svelte';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import { toast } from 'svelte-sonner';
+	import { setMode, mode } from 'mode-watcher';
 	let map;
 	let circle;
 	let coordinates;
@@ -27,16 +30,30 @@
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
+	let darkMap;
+	let lightMap;
+	$: handleThemeChange($mode);
+	let dataLoading = true;
+
+	function handleThemeChange(mode) {
+		if (lightMap && darkMap) {
+			if (mode === 'light') {
+				lightMap.addTo(map);
+				darkMap.remove();
+			} else {
+				darkMap.addTo(map);
+				lightMap.remove();
+			}
+		}
+	}
 
 	function createMap(container) {
-		let m = L.map(container, { preferCanvas: true, zoomControl: false, maxZoom: 11 }).setView(
-			...initialView
-		);
-		L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
-	        &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
-			subdomains: 'abcd'
-		}).addTo(m);
+		let m = L.map(container, {
+			preferCanvas: true,
+			zoomControl: false,
+			maxZoom: 12,
+			minZoom: 3
+		}).setView(...initialView);
 
 		return m;
 	}
@@ -60,7 +77,8 @@
 	}
 
 	function dataLoaded() {
-		console.log('data loaded');
+		dataLoading = false;
+		toast('data loaded');
 	}
 
 	onMount(() => {
@@ -69,15 +87,24 @@
 			dataLoaded();
 		});
 
-		circle = L.circle([48, 9], {
-			color: '#ef4444',
-			fillColor: '#ef4444',
-			fillOpacity: 0.1,
-			radius: 50000,
-			interactive: false
-		}).addTo(map);
-
 		map.on('click', onMapClick);
+
+		darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
+				&copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
+			subdomains: 'abcd'
+		});
+
+		lightMap = L.tileLayer(
+			'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+			{
+				attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
+				&copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
+				subdomains: 'abcd'
+			}
+		);
+
+		handleThemeChange($mode);
 
 		L.DomUtil.addClass(map._container, 'cursor-default');
 		L.DomUtil.removeClass(map._container, 'leaflet-grab');
@@ -87,6 +114,7 @@
 			showCoverageOnHover: false,
 			zoomToBoundsOnClick: true,
 			maxClusterRadius: 40,
+			disableClusteringAtZoom: map.getMaxZoom(),
 			iconCreateFunction: function (cluster) {
 				return L.divIcon({
 					html: `
@@ -97,7 +125,7 @@
 					</div>
 					`,
 					iconSize: [32, 32],
-					className: 'bg-white text-black rounded-full shadow'
+					className: 'bg-background text-primary rounded-full shadow'
 				});
 			}
 		});
@@ -108,7 +136,15 @@
 			iconSize: [32, 32],
 			iconAnchor: [16, 32],
 			popupAnchor: [0, -16],
-			className: 'drop-shadow'
+			className: 'drop-shadow fill-primary'
+		});
+
+		circle = L.circle([0, 0], {
+			color: '#ef4444',
+			fillColor: '#ef4444',
+			fillOpacity: 0.1,
+			radius: 0,
+			interactive: false
 		});
 	});
 
@@ -124,6 +160,7 @@
 		if (!isNaN(lat) && !isNaN(lng)) {
 			circle.setRadius(radius * 1000);
 			circle.setLatLng([lat, lng]);
+			circle.addTo(map);
 
 			let closestPoint: {};
 			let closestDistance = Infinity;
@@ -186,20 +223,41 @@
 			<Label for="radius" class="font-semibold">Radius</Label>
 			<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
 		</div>
-		<Button type="button" on:click={search}>Search</Button>
+		<Button type="button" disabled={dataLoading} on:click={search}>Search</Button>
 	</div>
 	<div class="relative w-full h-full">
 		<div id="map" class="h-full w-full outline-none" use:mapAction></div>
 		<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
-			<Button variant="ghost" class="shadow w-10 p-0 bg-white" on:click={map.zoomIn(1)}
-				><img width="16" height="16" src="./icons/plus.svg" alt="zoom in" /></Button
+			<Button variant="ghost" class="shadow w-10 p-0 bg-background" on:click={map.zoomIn(1)}
+				><svg
+					width="16"
+					height="16"
+					class="fill-primary"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+					><path
+						d="M11.883 3.007 12 3a1 1 0 0 1 .993.883L13 4v7h7a1 1 0 0 1 .993.883L21 12a1 1 0 0 1-.883.993L20 13h-7v7a1 1 0 0 1-.883.993L12 21a1 1 0 0 1-.993-.883L11 20v-7H4a1 1 0 0 1-.993-.883L3 12a1 1 0 0 1 .883-.993L4 11h7V4a1 1 0 0 1 .883-.993L12 3l-.117.007Z"
+					/></svg
+				></Button
 			>
-			<Button variant="ghost" class="shadow w-10 p-0 bg-white" on:click={map.zoomOut(1)}
-				><img width="16" height="16" src="./icons/minus.svg" alt="zoom out" /></Button
+			<Button variant="ghost" class="shadow w-10 p-0 bg-background" on:click={map.zoomOut(1)}
+				><svg
+					width="16"
+					height="16"
+					class="fill-primary"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+					><path d="M3.997 13H20a1 1 0 1 0 0-2H3.997a1 1 0 1 0 0 2Z" /></svg
+				></Button
 			>
 		</div>
 	</div>
 </div>
 
+<Toaster />
+
 <style>
+	#map {
+		background: hsl(var(--background));
+	}
 </style>
