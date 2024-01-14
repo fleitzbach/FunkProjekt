@@ -12,6 +12,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator';
+	import * as HoverCard from '$lib/components/ui/hover-card';
 	let map;
 	let circle;
 	let latitude;
@@ -24,12 +25,13 @@
 	let markerIcon;
 
 	function createMap(container) {
-		let m = L.map(container, { preferCanvas: true }).setView(...initialView);
+		let m = L.map(container, { preferCanvas: true, zoomControl: false, maxZoom: 13 }).setView(
+			...initialView
+		);
 		L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
 			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
 	        &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
-			subdomains: 'abcd',
-			maxZoom: 20
+			subdomains: 'abcd'
 		}).addTo(m);
 
 		return m;
@@ -66,12 +68,14 @@
 			color: 'red',
 			fillColor: '#f03',
 			fillOpacity: 0.1,
-			radius: 50000
+			radius: 50000,
+			interactive: false
 		}).addTo(map);
 
-		//circle.bindOverla(circlePopup);
-
 		map.on('click', onMapClick);
+
+		L.DomUtil.addClass(map._container, 'cursor-default');
+		L.DomUtil.removeClass(map._container, 'leaflet-grab');
 
 		markers = L.markerClusterGroup({
 			spiderfyOnMaxZoom: false,
@@ -155,29 +159,48 @@
 <div class="flex flex-row h-full">
 	<div class="p-5 flex flex-col gap-5 items-baseline grow max-w-[300px] w-full">
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for Stations</h3>
-		<div class='w-full'>
+		<div class="w-full">
 			<Label for="coordinates" class="font-semibold">Coordinates</Label>
+			<HoverCard.Root>
+				<HoverCard.Trigger class="inline-block">
+					<img width="12" height="12" src="./icons/info-outlined.svg" alt="info" />
+				</HoverCard.Trigger>
+				<HoverCard.Content>Click anywhere on the map to set coordinates.</HoverCard.Content>
+			</HoverCard.Root>
 			<div class="rounded-md border border-input" id="coordinates">
 				<Input
-				type="text"
-				bind:value={latitude}
-				placeholder="Latitude"
-				class="rounded-none border-none"
+					type="text"
+					bind:value={latitude}
+					placeholder="Latitude"
+					class="rounded-none border-none"
 				/>
 				<Separator class="h-[.5px]"></Separator>
 				<Input
-				type="text"
-				bind:value={longitude}
-				placeholder="Longitude"
-				class="rounded-none border-none"
+					type="text"
+					bind:value={longitude}
+					placeholder="Longitude"
+					class="rounded-none border-none"
 				/>
 			</div>
 		</div>
-		<div class='w-full'>
+		<div class="w-full">
 			<Label for="radius" class="font-semibold">Radius</Label>
-			<Slider bind:value={radius} id="radius" class="py-3" />
+			<Slider bind:value={radius} id="radius" class="py-2" />
 		</div>
 		<Button type="button" on:click={search}>Search</Button>
 	</div>
-	<div id="map" class="h-full w-full outline-none" use:mapAction></div>
+	<div class="relative w-full h-full">
+		<div id="map" class="h-full w-full outline-none" use:mapAction></div>
+		<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
+			<Button variant="outline" class="shadow w-10 p-0" on:click={map.zoomIn(1)}
+				><img width="16" height="16" src="./icons/plus.svg" alt="zoom in" /></Button
+			>
+			<Button variant="outline" class="shadow w-10 p-0" on:click={map.zoomOut(1)}
+				><img width="16" height="16" src="./icons/minus.svg" alt="zoom out" /></Button
+			>
+		</div>
+	</div>
 </div>
+
+<style>
+</style>
