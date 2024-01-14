@@ -80,5 +80,6 @@
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   box-shadow: none !important;
-  @apply drop-shadow-lg bg-primary;
+  background: hsl(var(--background)) !important;
+  @apply drop-shadow-lg;
 }

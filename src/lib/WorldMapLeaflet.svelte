@@ -18,6 +18,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { toast } from 'svelte-sonner';
 	import { setMode, mode } from 'mode-watcher';
+	import * as Popover from '$lib/components/ui/popover';
 	let map;
 	let circle;
 	let coordinates;
@@ -201,6 +202,7 @@
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
 		<div class="w-full">
 			<Label for="station" class="font-semibold">Station</Label>
+
 			<Input type="text" placeholder="Station name or ID" id="station" />
 		</div>
 		<div class="w-full">
