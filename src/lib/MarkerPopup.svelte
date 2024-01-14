@@ -9,7 +9,7 @@
 	}
 </script>
 
-<div>
+<div class="text-primary">
 	<h4 class="scroll-m-20 text-xl font-semibold tracking-tight capitalize">{name.toLowerCase()}</h4>
 	<br />
 	<Button type="button" on:click={handleButtonClick}>View Data</Button>

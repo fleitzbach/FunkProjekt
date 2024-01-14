@@ -13,12 +13,13 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as HoverCard from '$lib/components/ui/hover-card';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import SliderWithInput from '$lib/components/SliderWithInput.svelte';
 	let map;
 	let circle;
 	let coordinates;
-	$: latitude = coordinates?.split(/\,\s+/)[0];
-	$: longitude = coordinates?.split(/\,\s+/)[1];
+	$: latitude = coordinates?.split(/\,\s*/)[0];
+	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
 
 	export let pointsPromise;
@@ -140,17 +141,15 @@
 			markers.clearLayers();
 			nearbyPoints.forEach((point) => {
 				let marker = L.marker(point.latlng, { icon: markerIcon });
-				marker.on('click', () => {
-					const popupContent = document.createElement('div');
-					new MarkerPopup({
-						target: popupContent,
-						props: {
-							name: point.name
-						}
-					});
-
-					marker.bindPopup(popupContent);
+				const popupContent = document.createElement('div');
+				new MarkerPopup({
+					target: popupContent,
+					props: {
+						name: point.name
+					}
 				});
+
+				marker.bindPopup(popupContent);
 
 				markers.addLayer(marker);
 			});
@@ -169,14 +168,12 @@
 		</div>
 		<div class="w-full">
 			<Label for="coordinates" class="font-semibold">Coordinates</Label>
-			<HoverCard.Root>
-				<HoverCard.Trigger class="inline-block">
+			<Tooltip.Root>
+				<Tooltip.Trigger class="inline-block">
 					<img width="12" height="12" src="./icons/info-outlined.svg" alt="info" />
-				</HoverCard.Trigger>
-				<HoverCard.Content
-					>Search by station name or click anywhere on the map to set coordinates.</HoverCard.Content
-				>
-			</HoverCard.Root>
+				</Tooltip.Trigger>
+				<Tooltip.Content>Click anywhere on the map to set coordinates.</Tooltip.Content>
+			</Tooltip.Root>
 			<Input
 				type="text"
 				bind:value={coordinates}
