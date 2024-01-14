@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { Slider as SliderPrimitive } from "bits-ui";
 	import { cn } from "$lib/utils";
+	import { createEventDispatcher } from 'svelte';
 
+	const dispatch = createEventDispatcher();
+	
 	type $$Props = SliderPrimitive.Props;
-
+	
 	let className: $$Props["class"] = undefined;
 	export let value: $$Props["value"] = [0];
+	$: dispatch('change', value)
 	export { className as class };
 </script>
 

@@ -13,11 +13,14 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as HoverCard from '$lib/components/ui/hover-card';
+	import SliderWithInput from '$lib/components/SliderWithInput.svelte';
 	let map;
 	let circle;
-	let latitude;
-	let longitude;
-	let radius = [30];
+	let coordinates;
+	$: latitude = coordinates?.split(/\,\s+/)[0];
+	$: longitude = coordinates?.split(/\,\s+/)[1];
+	let radius = 50;
+
 	export let pointsPromise;
 	let points;
 	let markers;
@@ -25,7 +28,7 @@
 	let markerIcon;
 
 	function createMap(container) {
-		let m = L.map(container, { preferCanvas: true, zoomControl: false, maxZoom: 13 }).setView(
+		let m = L.map(container, { preferCanvas: true, zoomControl: false, maxZoom: 11 }).setView(
 			...initialView
 		);
 		L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -50,8 +53,9 @@
 	}
 
 	function onMapClick(e) {
-		latitude = e.latlng.lat;
-		longitude = e.latlng.lng;
+		let lat = e.latlng.lat.toFixed(5);
+		let lng = e.latlng.lng.toFixed(5);
+		coordinates = `${lat}, ${lng}`;
 	}
 
 	function dataLoaded() {
@@ -65,8 +69,8 @@
 		});
 
 		circle = L.circle([48, 9], {
-			color: 'red',
-			fillColor: '#f03',
+			color: '#ef4444',
+			fillColor: '#ef4444',
 			fillOpacity: 0.1,
 			radius: 50000,
 			interactive: false
@@ -81,7 +85,7 @@
 			spiderfyOnMaxZoom: false,
 			showCoverageOnHover: false,
 			zoomToBoundsOnClick: true,
-			maxClusterRadius: 30,
+			maxClusterRadius: 40,
 			iconCreateFunction: function (cluster) {
 				return L.divIcon({
 					html: `
@@ -92,7 +96,7 @@
 					</div>
 					`,
 					iconSize: [32, 32],
-					className: 'bg-black text-white rounded-full'
+					className: 'bg-white text-black rounded-full shadow'
 				});
 			}
 		});
@@ -102,7 +106,8 @@
 			iconUrl: './icons/pin.svg',
 			iconSize: [32, 32],
 			iconAnchor: [16, 32],
-			popupAnchor: [0, -16]
+			popupAnchor: [0, -16],
+			className: 'drop-shadow'
 		});
 	});
 
@@ -113,18 +118,17 @@
 	function search(e) {
 		let lat = parseFloat(latitude);
 		let lng = parseFloat(longitude);
-		let maxDistance = radius[0];
-		// console.log(lat, lng, maxDistance);
+		console.log(lat, lng, radius);
 
 		if (!isNaN(lat) && !isNaN(lng)) {
-			circle.setRadius(maxDistance * 1000);
+			circle.setRadius(radius * 1000);
 			circle.setLatLng([lat, lng]);
 
 			let closestPoint: {};
 			let closestDistance = Infinity;
 			let nearbyPoints = points.filter((point) => {
 				const distance = calculateDistance(lat, lng, point.latitude, point.longitude);
-				return distance <= maxDistance;
+				return distance <= radius;
 			});
 
 			nearbyPoints = nearbyPoints.map((point) => {
@@ -157,45 +161,43 @@
 </script>
 
 <div class="flex flex-row h-full">
-	<div class="p-5 flex flex-col gap-5 items-baseline grow max-w-[300px] w-full">
-		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for Stations</h3>
+	<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full">
+		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
+		<div class="w-full">
+			<Label for="station" class="font-semibold">Station</Label>
+			<Input type="text" placeholder="Station name or ID" id="station" />
+		</div>
 		<div class="w-full">
 			<Label for="coordinates" class="font-semibold">Coordinates</Label>
 			<HoverCard.Root>
 				<HoverCard.Trigger class="inline-block">
 					<img width="12" height="12" src="./icons/info-outlined.svg" alt="info" />
 				</HoverCard.Trigger>
-				<HoverCard.Content>Click anywhere on the map to set coordinates.</HoverCard.Content>
+				<HoverCard.Content
+					>Search by station name or click anywhere on the map to set coordinates.</HoverCard.Content
+				>
 			</HoverCard.Root>
-			<div class="rounded-md border border-input" id="coordinates">
-				<Input
-					type="text"
-					bind:value={latitude}
-					placeholder="Latitude"
-					class="rounded-none border-none"
-				/>
-				<Separator class="h-[.5px]"></Separator>
-				<Input
-					type="text"
-					bind:value={longitude}
-					placeholder="Longitude"
-					class="rounded-none border-none"
-				/>
-			</div>
+			<Input
+				type="text"
+				bind:value={coordinates}
+				placeholder="Latitude, Longitude"
+				id="coordinates"
+				class=""
+			/>
 		</div>
 		<div class="w-full">
 			<Label for="radius" class="font-semibold">Radius</Label>
-			<Slider bind:value={radius} id="radius" class="py-2" />
+			<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
 		</div>
 		<Button type="button" on:click={search}>Search</Button>
 	</div>
 	<div class="relative w-full h-full">
 		<div id="map" class="h-full w-full outline-none" use:mapAction></div>
 		<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
-			<Button variant="outline" class="shadow w-10 p-0" on:click={map.zoomIn(1)}
+			<Button variant="ghost" class="shadow w-10 p-0 bg-white" on:click={map.zoomIn(1)}
 				><img width="16" height="16" src="./icons/plus.svg" alt="zoom in" /></Button
 			>
-			<Button variant="outline" class="shadow w-10 p-0" on:click={map.zoomOut(1)}
+			<Button variant="ghost" class="shadow w-10 p-0 bg-white" on:click={map.zoomOut(1)}
 				><img width="16" height="16" src="./icons/minus.svg" alt="zoom out" /></Button
 			>
 		</div>
