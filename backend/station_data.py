@@ -93,7 +93,7 @@ def _calculate_distance_(lat1: float, lon1: float, lat2:float, lon2:float) -> fl
 
     return distance
 
-def get_stations(latitude: float, longitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
+def get_stations(longitude: float, latitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
     """gets all stations in a given radius
 
     Keyword arguments:
@@ -110,6 +110,8 @@ def get_stations(latitude: float, longitude: float, radius: float, start: int , 
         & (df['first_year'] >= start) 
         & (df['last_year'] <= end)
         ]
+
+    return df
     
 def get_station_by_name(name: str) -> pd.DataFrame:
     """gets all stations with a given name
@@ -122,3 +124,6 @@ def get_station_by_name(name: str) -> pd.DataFrame:
     df = df.loc[df['name'].str.contains(name, case=False)]
     
     return df
+
+if __name__ == "__main__":
+    print(get_stations(51.5, 7.5, 10000, 2010, 2020, 10))
