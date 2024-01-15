@@ -40,5 +40,12 @@ def get_data_of_year(id: str, rythm: str,start: str, end: str):
 
     return json.loads(df.to_json(orient='records'))
 
+@app.get("/stations/{name}")
+def get_station_by_name(name: str):
+
+    df = station_data.get_station_by_name(name)
+
+    return json.loads(df.to_json(orient='records'))
+
 if __name__ == "__main__":
     uvicorn.run(app, host='localhost', port=8000)

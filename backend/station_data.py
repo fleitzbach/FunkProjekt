@@ -110,5 +110,15 @@ def get_stations(latitude: float, longitude: float, radius: float, start: int , 
         & (df['first_year'] >= start) 
         & (df['last_year'] <= end)
         ]
-
+    
+def get_station_by_name(name: str) -> pd.DataFrame:
+    """gets all stations with a given name
+    
+    Keyword arguments:
+    name
+    Return: df with id, name, latitude, longitude, element, first_year and last_year
+    """
+    df = _get_combine_stations_and_inventory_()
+    df = df.loc[df['name'].str.contains(name, case=False)]
+    
     return df
