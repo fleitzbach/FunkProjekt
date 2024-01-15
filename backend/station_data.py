@@ -85,10 +85,9 @@ def calculate_distances(df, latitude, longitude):
     # Radius der Erde in Kilometern
     R = 6371.0
     df['distance'] = R * c
-
     return df
 
-def get_stations(longitude: float, latitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
+def get_stations(latitude: float, longitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
     #start_time = time.time()
     df = _get_combine_stations_and_inventory_()
     #print("get_combined: --- %s seconds ---" % (time.time() - start_time))
@@ -96,10 +95,10 @@ def get_stations(longitude: float, latitude: float, radius: float, start: int , 
     df = calculate_distances(df, latitude, longitude)
     #print("calculate_distance: --- %s seconds ---" % (time.time() - start_time))
     #start_time = time.time()
-    df = df.sort_values(by=['distance']).head(selection).loc[
+    df = df.sort_values(by=['distance'], ascending=True).head(selection).loc[
         (df['distance'] <= radius) 
-        & (df['first_year'] >= start) 
-        & (df['last_year'] <= end)
+        & (df['first_year'] <= start) 
+        & (df['last_year'] >= end)
         ]
     #print("filter: --- %s seconds ---" % (time.time() - start_time))
 
