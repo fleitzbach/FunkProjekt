@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from typing import Optional
 import os
 import json
-
+import uvicorn
 import station_data 
 import weather_data
 
@@ -26,3 +26,6 @@ def get_data_of_year(id: str, rythm: str,start: str, end: str):
     df = weather_data.get_weather_data(id, start, end, rythm)
 
     return json.loads(df.to_json(orient='records'))
+
+if __name__ == "__main__":
+    uvicorn.run(app, host='localhost', port=8000)

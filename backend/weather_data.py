@@ -19,7 +19,7 @@ def get_data_from_id(id:str) -> pd.DataFrame:
     compressed_file = BytesIO(response.content)
     decompressed_file = gzip.open(compressed_file, 'rt')
 
-    df = pd.read_csv(decompressed_file, header=None, names=['id', 'date', 'element', 'data_value','m-flag', 'q-flag', 's-flag', 'obs-time'])
+    df = pd.read_csv(decompressed_file, header=None, names=['id', 'date', 'element', 'data_value','m-flag', 'q-flag', 's-flag', 'obs-time'], usecols=['date', 'element', 'data_value'], dtype={'data_value': float})
     df = df.loc[(df['element'] == 'TMAX') | (df['element'] == 'TMIN')]
     df = df[['date', 'element', 'data_value']]
     df['data_value'] = df['data_value'].apply(lambda x: x / 10)
@@ -68,16 +68,16 @@ def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     rythm
     Return: df with date, element and data_value
     """
-
+    print(df)
     if rythm == 'year':
-        df = df.groupby(df['date'].dt.year).mean().reset_index()
+        df = df.groupby([df['date'].dt.to_period("Y"), 'element'])['data_value'].mean().reset_index()
     elif rythm == 'month':
-        df = df.groupby(df['date'].dt.month).mean().reset_index()
+        df = df.groupby([df['date'].dt.to_period("M"), 'element'])['data_value'].mean().reset_index()
     elif rythm == 'day':
-        df = df.groupby(df['date'].dt.day).mean().reset_index()
+        df = df.groupby([df['date'].dt.to_period("D"), 'element'])['data_value'].mean().reset_index()
     elif rythm == 'season':
         df['season'] = df['date'].map(get_season)
-        df = df.groupby('season').mean().reset_index()
+        df = df.groupby(['season', 'element'])['data_value'].mean().reset_index()
     else:
         return 'Rythm not found'
     
@@ -101,4 +101,4 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     return df
 
 if __name__ == '__main__':
-    print(get_weather_data('USW00094728', '2020-01-01', '2020-12-31', 'season'))
+    print(get_weather_data('USW00094728', '2020-01-01', '2021-12-31', 'day'))
