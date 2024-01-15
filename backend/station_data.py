@@ -93,7 +93,7 @@ def _calculate_distance_(lat1: float, lon1: float, lat2:float, lon2:float) -> fl
 
     return distance
 
-def get_stations(longitude: float, latitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
+def get_stations(latitude: float, longitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
     """gets all stations in a given radius
 
     Keyword arguments:

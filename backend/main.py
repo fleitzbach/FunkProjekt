@@ -5,13 +5,26 @@ import json
 import uvicorn
 import station_data 
 import weather_data
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-@app.get("/stations")
-def get_stations(longitude: float, latitude: float, radius: float, start: int, end: int, selection: Optional[int] = None):
+origins = [
+    "*"
+]
 
-    df = station_data.get_stations(longitude, latitude, radius, start, end, selection)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/stations")
+def get_stations(latitude: float, longitude: float, radius: float, start: int, end: int, selection: Optional[int] = None):
+
+    df = station_data.get_stations(latitude, longitude, radius, start, end, selection)
 
     return json.loads(df.to_json(orient='records'))
 

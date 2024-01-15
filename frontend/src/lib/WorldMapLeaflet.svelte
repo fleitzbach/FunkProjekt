@@ -19,14 +19,13 @@
 	import { toast } from 'svelte-sonner';
 	import { setMode, mode, ModeWatcher } from 'mode-watcher';
 	import * as Popover from '$lib/components/ui/popover';
+	import { API_URL } from '../config';
 	let map;
 	let circle;
 	let coordinates;
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
-
-	export let pointsPromise;
 	let points;
 	let markers;
 	const initialView = [[48, 9], 6];
@@ -34,7 +33,7 @@
 	let darkMap;
 	let lightMap;
 	$: handleThemeChange($mode);
-	let dataLoading = true;
+	let dataLoading = false;
 
 	function handleThemeChange(mode) {
 		if (lightMap && darkMap) {
@@ -77,17 +76,7 @@
 		coordinates = `${lat}, ${lng}`;
 	}
 
-	function dataLoaded() {
-		dataLoading = false;
-		toast('data loaded');
-	}
-
 	onMount(() => {
-		pointsPromise.then((res) => {
-			points = res;
-			dataLoaded();
-		});
-
 		map.on('click', onMapClick);
 
 		darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -149,50 +138,45 @@
 		});
 	});
 
-	function viewData() {
-		console.log('test');
-	}
-
-	function search(e) {
+	async function search(e) {
 		let lat = parseFloat(latitude);
 		let lng = parseFloat(longitude);
+		let start = 0;
+		let end = 3000;
 		console.log(lat, lng, radius);
 
 		if (!isNaN(lat) && !isNaN(lng)) {
-			circle.setRadius(radius * 1000);
-			circle.setLatLng([lat, lng]);
-			circle.addTo(map);
-
 			let closestPoint: {};
 			let closestDistance = Infinity;
-			let nearbyPoints = points.filter((point) => {
-				const distance = calculateDistance(lat, lng, point.latitude, point.longitude);
-				return distance <= radius;
-			});
+			fetch(
+				`${API_URL}/stations?latitude=${lat}&longitude=${lng}&radius=${radius}&start=${start}&end=${end}`,
+				{
+					headers: {}
+				}
+			).then((res) => {
+				res.json().then((data) => {
+					markers.clearLayers();
+					data.forEach((point) => {
+						let marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
+						const popupContent = document.createElement('div');
+						new MarkerPopup({
+							target: popupContent,
+							props: {
+								name: point.name
+							}
+						});
+						marker.bindPopup(popupContent);
 
-			nearbyPoints = nearbyPoints.map((point) => {
-				return {
-					latlng: [point.latitude, point.longitude],
-					name: point.name
-				};
-			});
-			markers.clearLayers();
-			nearbyPoints.forEach((point) => {
-				let marker = L.marker(point.latlng, { icon: markerIcon });
-				const popupContent = document.createElement('div');
-				new MarkerPopup({
-					target: popupContent,
-					props: {
-						name: point.name
-					}
+						markers.addLayer(marker);
+					});
 				});
 
-				marker.bindPopup(popupContent);
-
-				markers.addLayer(marker);
+				circle.setRadius(radius * 1000);
+				circle.setLatLng([lat, lng]);
+				circle.addTo(map);
+				map.fitBounds(circle.getBounds());
 			});
 
-			map.fitBounds(circle.getBounds());
 		}
 	}
 </script>
