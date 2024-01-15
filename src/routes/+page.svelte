@@ -4,7 +4,7 @@
   import WorldMapLeaflet from '$lib/WorldMapLeaflet.svelte';
   export let data;
   let pointsPromise = data.pointsPromise
-  export const ssr = false;
+  
 </script>
 
 <main>

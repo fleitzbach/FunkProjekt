@@ -17,7 +17,7 @@
 	import SliderWithInput from '$lib/components/SliderWithInput.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { toast } from 'svelte-sonner';
-	import { setMode, mode } from 'mode-watcher';
+	import { setMode, mode, ModeWatcher } from 'mode-watcher';
 	import * as Popover from '$lib/components/ui/popover';
 	let map;
 	let circle;
@@ -38,12 +38,12 @@
 
 	function handleThemeChange(mode) {
 		if (lightMap && darkMap) {
-			if (mode === 'light') {
-				lightMap.addTo(map);
-				darkMap.remove();
-			} else {
+			if (mode === 'dark') {
 				darkMap.addTo(map);
 				lightMap.remove();
+			} else {
+				lightMap.addTo(map);
+				darkMap.remove();
 			}
 		}
 	}
@@ -257,6 +257,8 @@
 </div>
 
 <Toaster />
+
+<ModeWatcher />
 
 <style>
 	#map {
