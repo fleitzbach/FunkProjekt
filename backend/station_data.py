@@ -3,6 +3,8 @@ import requests
 from io import StringIO
 from math import radians, cos, sin, sqrt, atan2
 from datetime import datetime
+import time
+import numpy as np
 
 def _get_stations_() -> pd.DataFrame:
     """gets all stations
@@ -70,46 +72,36 @@ def _get_combine_stations_and_inventory_() -> pd.DataFrame:
 
     return df
 
-def _calculate_distance_(lat1: float, lon1: float, lat2:float, lon2:float) -> float:
-    """calculates the distance between two points on earth with the haversine formula
-    
-    Keyword arguments:
-    lat and lon from position 1 and two
-    Return: distance in km
-    """
-    
+def calculate_distances(df, latitude, longitude):
     # Umrechnung von Grad zu Radian
-    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    lat1, lon1, lat2, lon2 = map(np.radians, [latitude, longitude, df['latitude'], df['longitude']])
 
     # Haversine Formel
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
+    c = 2 * np.arcsin(np.sqrt(a))
 
     # Radius der Erde in Kilometern
     R = 6371.0
-    distance = R * c
+    df['distance'] = R * c
 
-    return distance
+    return df
 
 def get_stations(longitude: float, latitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
-    """gets all stations in a given radius
-
-    Keyword arguments:
-    longitude, latitude, radius, start, end and selection
-    Return: df with id, name, latitude, longitude, element, first_year and last_year
-    """
+    #start_time = time.time()
     df = _get_combine_stations_and_inventory_()
-
-    df['distance'] = df.apply(lambda row: _calculate_distance_(latitude, longitude, row['latitude'], row['longitude']), axis=1)
-    df = df.sort_values(by=['distance'])
-    df = df.head(selection)
-    df = df.loc[
+    #print("get_combined: --- %s seconds ---" % (time.time() - start_time))
+    #start_time = time.time()
+    df = calculate_distances(df, latitude, longitude)
+    #print("calculate_distance: --- %s seconds ---" % (time.time() - start_time))
+    #start_time = time.time()
+    df = df.sort_values(by=['distance']).head(selection).loc[
         (df['distance'] <= radius) 
         & (df['first_year'] >= start) 
         & (df['last_year'] <= end)
         ]
+    #print("filter: --- %s seconds ---" % (time.time() - start_time))
 
     return df
     
