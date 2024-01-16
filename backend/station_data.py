@@ -96,10 +96,13 @@ def get_stations(latitude: float, longitude: float, radius: float, start: int , 
     #print("calculate_distance: --- %s seconds ---" % (time.time() - start_time))
     #start_time = time.time()
     df = df.sort_values(by=['distance'], ascending=True).head(selection).loc[
-        (df['distance'] <= radius) 
-        & (df['first_year'] >= start) 
-        & (df['last_year'] <= end)
+        (df['distance'] <= radius)
         ]
+    
+    if start != None:
+        df = df.loc[df['first_year'] <= start]
+    if end != None:
+        df = df.loc[df['last_year'] >= end]
     #print("filter: --- %s seconds ---" % (time.time() - start_time))
 
     return df
