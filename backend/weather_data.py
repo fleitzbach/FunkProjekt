@@ -1,3 +1,4 @@
+import json
 import requests
 import gzip
 from io import BytesIO
@@ -68,7 +69,7 @@ def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     rythm
     Return: df with date, element and data_value
     """
-    print(df)
+
     if rythm == 'year':
         df = df.groupby([df['date'].dt.to_period("Y"), 'element'])['data_value'].mean().reset_index()
     elif rythm == 'month':
@@ -81,6 +82,8 @@ def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     else:
         return 'Rythm not found'
     
+    if rythm != 'season':
+        df['date'] = df['date'].astype(str)
     return df
 
 def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
@@ -101,4 +104,4 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     return df
 
 if __name__ == '__main__':
-    print(get_weather_data('USW00094728', '2020-01-01', '2021-12-31', 'day'))
+    print(get_weather_data('USW00094728', '2020-01-01', '2021-12-31', 'season').to_json(orient="records"))
