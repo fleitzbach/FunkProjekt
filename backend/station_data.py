@@ -97,8 +97,8 @@ def get_stations(latitude: float, longitude: float, radius: float, start: int , 
     #start_time = time.time()
     df = df.sort_values(by=['distance'], ascending=True).head(selection).loc[
         (df['distance'] <= radius) 
-        & (df['first_year'] <= start) 
-        & (df['last_year'] >= end)
+        & (df['first_year'] >= start) 
+        & (df['last_year'] <= end)
         ]
     #print("filter: --- %s seconds ---" % (time.time() - start_time))
 
@@ -117,4 +117,4 @@ def get_station_by_name(name: str) -> pd.DataFrame:
     return df
 
 if __name__ == "__main__":
-    print(get_stations(51.5, 7.5, 10000, 2010, 2020, 10))
+    print(get_stations(51.5, 7.5, 100, 2010, 2020, 10))

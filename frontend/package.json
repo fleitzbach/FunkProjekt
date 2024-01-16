@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@amcharts/amcharts5-geodata": "^5.1.2",
 		"bits-ui": "^0.14.0",
+		"chart.js": "^4.4.1",
 		"clsx": "^2.1.0",
 		"https": "^1.0.0",
 		"leaflet": "^1.9.4",
