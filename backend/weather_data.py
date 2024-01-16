@@ -104,10 +104,10 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     df = filter_data(df, start, end)
     #print("filter_data --- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
-    #df = calc_mean(df, rythm)
+    df = calc_mean(df, rythm)
     #print("calc_mean --- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
-    #df = df.pivot(index='date', columns='element', values='data_value').reset_index()
+    df = df.pivot(index='date', columns='element', values='data_value').reset_index()
     #print("pivot --- %s seconds ---" % (time.time() - start_time))
 
     return df
