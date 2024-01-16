@@ -1,5 +1,5 @@
 # FunkProjekt
-Das Projekt von Funk
 
+## Setup
 
-Funk tioniert 😂😂😂
+setup.sh ausführen
