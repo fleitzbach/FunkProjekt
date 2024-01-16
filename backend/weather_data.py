@@ -3,6 +3,7 @@ import gzip
 from io import BytesIO
 import pandas as pd
 from datetime import datetime
+import time
 
 def get_data_from_id(id:str) -> pd.DataFrame:
     """gets Data from a given id
@@ -93,10 +94,18 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     rythm
     Return: df with date, element and data_value
     """
-
+    #start_time = time.time()
     df = get_data_from_id(id)
+    #print("get_data_from_id --- %s seconds ---" % (time.time() - start_time))
+    #start_time = time.time()
     df = filter_data(df, start, end)
-    df = calc_mean(df, rythm)
+    #print("filter_data --- %s seconds ---" % (time.time() - start_time))
+    start_time = time.time()
+    #df = calc_mean(df, rythm)
+    #print("calc_mean --- %s seconds ---" % (time.time() - start_time))
+    start_time = time.time()
+    #df = df.pivot(index='date', columns='element', values='data_value').reset_index()
+    #print("pivot --- %s seconds ---" % (time.time() - start_time))
 
     return df
 
