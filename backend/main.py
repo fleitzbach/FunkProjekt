@@ -10,19 +10,21 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "*"
+    "*",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
 
 @app.get("/stations")
-def get_stations(latitude: float, longitude: float, radius: float, start: Optional[int] = 0, end: Optional[int] = datetime.now().year, selection: Optional[int] = None):
+def get_stations(latitude: float, longitude: float, radius: float, start: Optional[int] = None, end: Optional[int] = None, selection: Optional[int] = None):
 
     df = station_data.get_stations(latitude, longitude, radius, start, end, selection)
 
