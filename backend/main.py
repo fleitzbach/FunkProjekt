@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from typing import Optional
-import os
+from datetime import datetime
 import json
 import uvicorn
 import station_data 
@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 @app.get("/stations")
-def get_stations(latitude: float, longitude: float, radius: float, start: int, end: int, selection: Optional[int] = None):
+def get_stations(latitude: float, longitude: float, radius: float, start: Optional[int] = 0, end: Optional[int] = datetime.now().year, selection: Optional[int] = None):
 
     df = station_data.get_stations(latitude, longitude, radius, start, end, selection)
 
