@@ -26,4 +26,4 @@ function createCurrentStationStore() {
   };
 }
 
-export const currentStationStore = createCurrentStationStore();
+export const currentStation = createCurrentStationStore();

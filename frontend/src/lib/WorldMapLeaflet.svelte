@@ -18,10 +18,12 @@
 	import { setMode, mode, ModeWatcher } from 'mode-watcher';
 	import { API_URL } from '../config';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { slide } from 'svelte/transition';
+	import { fly, slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import TemperatureChart from './TemperatureChart.svelte';
-	import { dataStore, currentStationStore } from './store';
+	import { dataStore, currentStation } from './store';
+	import InfoOutlined from './components/themed-icons/InfoOutlined.svelte';
+	import Switch from './components/ui/switch/switch.svelte';
 	let map;
 	let circle;
 	let coordinates;
@@ -34,8 +36,12 @@
 	let markerIcon;
 	let darkMap;
 	let lightMap;
+	let startYear;
+	let endYear;
+	let searchByCoordinates = true;
 	$: handleThemeChange($mode);
 	let dataLoading = false;
+	let searchName = '';
 
 	function handleThemeChange(mode) {
 		if (lightMap && darkMap) {
@@ -61,7 +67,6 @@
 	}
 
 	function mapAction(container) {
-		console.log('test');
 		map = createMap(container);
 
 		return {
@@ -141,7 +146,7 @@
 	});
 
 	async function viewData(station) {
-		currentStationStore.setCurrentStation(station)
+		currentStation.setCurrentStation(station);
 		let start = '2000-01-01';
 		let end = '2000-12-31';
 		let dataUrl = `${API_URL}/data/${station.id}/${'month'}?start=${start}&end=${end}`;
@@ -149,15 +154,61 @@
 	}
 
 	async function search(e) {
-		let lat = parseFloat(latitude);
-		let lng = parseFloat(longitude);
-		let start = 1980;
-		let end = 2000;
-		console.log(lat, lng, radius);
+		if (searchByCoordinates) {
+			let lat = parseFloat(latitude);
+			let lng = parseFloat(longitude);
+			console.log(lat, lng, radius);
 
-		if (!isNaN(lat) && !isNaN(lng)) {
+			if (!isNaN(lat) && !isNaN(lng)) {
+				dataLoading = true;
+				let dataUrl = `${API_URL}/stations?latitude=${lat}&longitude=${lng}&radius=${radius}&selection=${100}`;
+				if (startYear) {
+					dataUrl += `&start=${startYear}`;
+				}
+				if (endYear) {
+					dataUrl += `&end=${endYear}`;
+				}
+				fetch(dataUrl, {
+					headers: {}
+				}).then((res) => {
+					res.json().then((data) => {
+						toast(`Found ${data.length} stations.`);
+						dataLoading = false;
+						markers.clearLayers();
+						points = data;
+						data.forEach((point) => {
+							let marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
+							const popupContent = document.createElement('div');
+							new MarkerPopup({
+								target: popupContent,
+								props: {
+									name: point.name
+								}
+							});
+							popupContent.addEventListener('click', (e) => {
+								if ((e.target as HTMLElement).dataset.action === 'viewData') {
+									viewData(point);
+								}
+							});
+							marker.bindPopup(popupContent);
+
+							markers.addLayer(marker);
+						});
+					});
+
+					circle.setRadius(radius * 1000);
+					circle.setLatLng([lat, lng]);
+					circle.addTo(map);
+					map.fitBounds(circle.getBounds());
+				});
+			}
+		} else {
+			if (!searchName) {
+				toast('Please enter a station name.');
+				return;
+			}
 			dataLoading = true;
-			let dataUrl = `${API_URL}/stations?latitude=${lat}&longitude=${lng}&radius=${radius}&selection=${100}`;
+			let dataUrl = `${API_URL}/stations/${searchName}?selection=${100}`;
 			fetch(dataUrl, {
 				headers: {}
 			}).then((res) => {
@@ -176,20 +227,18 @@
 							}
 						});
 						popupContent.addEventListener('click', (e) => {
-							if (e.target.dataset.action === 'viewData') {
+							if ((e.target as HTMLElement).dataset.action === 'viewData') {
 								viewData(point);
 							}
 						});
 						marker.bindPopup(popupContent);
 
 						markers.addLayer(marker);
+						map.fitBounds(markers.getBounds());
 					});
 				});
 
-				circle.setRadius(radius * 1000);
-				circle.setLatLng([lat, lng]);
-				circle.addTo(map);
-				map.fitBounds(circle.getBounds());
+				circle.remove();
 			});
 		}
 	}
@@ -200,30 +249,56 @@
 		<!-- Search settings -->
 		<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] min-w-0 w-full">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
-			<div class="w-full">
-				<Label for="station" class="font-semibold">Station</Label>
-				<Input type="text" placeholder="Station name or ID" id="station" />
+			<div>
+				<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
+				<div class="flex gap-2 py-2">
+					Name
+					<Switch bind:checked={searchByCoordinates}></Switch>
+					Coordinates
+				</div>
 			</div>
-			<div class="w-full">
-				<Label for="coordinates" class="font-semibold">Coordinates</Label>
-				<Tooltip.Root>
-					<Tooltip.Trigger class="inline-block">
-						<img width="12" height="12" src="./icons/info-outlined.svg" alt="info" />
-					</Tooltip.Trigger>
-					<Tooltip.Content>Click anywhere on the map to set coordinates.</Tooltip.Content>
-				</Tooltip.Root>
-				<Input
-					type="text"
-					bind:value={coordinates}
-					placeholder="Latitude, Longitude"
-					id="coordinates"
-					class=""
-				/>
-			</div>
-			<div class="w-full">
-				<Label for="radius" class="font-semibold">Radius</Label>
-				<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
-			</div>
+			{#if searchByCoordinates}
+				<div class="flex flex-col gap-5">
+					<div class="w-full">
+						<Label for="coordinates" class="font-semibold">Coordinates</Label>
+						<Tooltip.Root>
+							<Tooltip.Trigger class="inline-block">
+								<InfoOutlined size={12}></InfoOutlined>
+							</Tooltip.Trigger>
+							<Tooltip.Content>Click anywhere on the <br /> map to set coordinates.</Tooltip.Content
+							>
+						</Tooltip.Root>
+						<Input
+							type="text"
+							bind:value={coordinates}
+							placeholder="Latitude, Longitude"
+							id="coordinates"
+							class=""
+						/>
+					</div>
+					<div class="w-full">
+						<Label for="radius" class="font-semibold">Radius</Label>
+						<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
+					</div>
+					<div class="flex flex-row items-center gap-5">
+						<div>
+							<Label for="start" class="font-semibold">Start year</Label>
+							<Input type="text" id="start" bind:value={startYear} class="w-full" />
+						</div>
+						<div>to</div>
+						<div>
+							<Label for="end" class="font-semibold">End year</Label>
+							<Input type="text" id="end" bind:value={endYear} class="w-full" />
+						</div>
+					</div>
+				</div>
+			{:else}
+				<div class="w-full overflow-clip">
+					<Label for="station-name" class="font-semibold">Station Name</Label>
+					<Input type="text" id="station-name" class="w-full" bind:value={searchName} />
+				</div>
+			{/if}
+
 			<Button type="button" disabled={dataLoading} class="w-24" on:click={search}>
 				{#if dataLoading}
 					<svg
@@ -254,7 +329,12 @@
 		<Separator orientation="vertical"></Separator>
 		<!-- Map View -->
 		<Tabs.Content value="map" class="relative w-full m-0">
-			<div id="map" class="h-full w-full outline-none" use:mapAction on:resize={map.invalidateSize()}></div>
+			<div
+				id="map"
+				class="h-full w-full outline-none"
+				use:mapAction
+				on:resize={map.invalidateSize()}
+			></div>
 			<!-- Zoom Controls -->
 			<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
 				<Button variant="outline" class="shadow w-10 p-0 bg-background" on:click={map.zoomIn(1)}
@@ -289,17 +369,14 @@
 			</Tabs.List>
 		</div>
 	</div>
-		{#if $currentStationStore.name != null}
-			<Separator orientation="horizontal"></Separator>
-			<div
-				transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }}
-				class="h-full"
-			>
-					<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
+	{#if $currentStation.name != null}
+		<Separator orientation="horizontal"></Separator>
+		<div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class="">
+			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
 
-					<TemperatureChart></TemperatureChart>
-			</div>
-		{/if}
+			<TemperatureChart></TemperatureChart>
+		</div>
+	{/if}
 </Tabs.Root>
 
 <Toaster />

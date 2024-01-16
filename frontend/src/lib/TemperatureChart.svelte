@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
-	import { dataStore, currentStationStore } from './store';
+	import { dataStore, currentStation } from './store';
 	import { Input } from './components/ui/input';
 	import Button from './components/ui/button/button.svelte';
 	import { API_URL } from '../config';
@@ -21,7 +21,7 @@
 						label: 'Maximum Temperature',
 						data: [],
 						tension: 0.2,
-            borderColor: "#f00"
+            borderColor: "#ef4444"
 					},
 					{
 						label: 'Minimum Temperature',
@@ -56,10 +56,10 @@
 	}
 
   function updateData() {
-    console.log($currentStationStore)
-    let start = $currentStationStore.first_year + "-01-01";
-    let end = $currentStationStore.last_year + "-12-31";
-    let id = $currentStationStore.id
+    console.log($currentStation)
+    let start = $currentStation.first_year + "-01-01";
+    let end = $currentStation.last_year + "-12-31";
+    let id = $currentStation.id
 		let dataUrl = `${API_URL}/data/${id}/${'year'}?start=${start}&end=${end}`;
     dataStore.fetchData(dataUrl);
   }
@@ -74,7 +74,7 @@
   </div>
   <!-- Visualisation -->
   <div class="w-full h-full p-5">
-    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStationStore.name}</h3>
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
     <canvas bind:this={chartElement} class='h-full w-full'></canvas>
   </div>
 </div>
