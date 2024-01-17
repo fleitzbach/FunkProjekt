@@ -1,17 +1,5 @@
-# Start backend server
-Start-Process -FilePath "bash" -ArgumentList "-c `"cd backend && uvicorn main:app --reload`""
+# Start the backend server in a new PowerShell window
+Start-Process "powershell" -ArgumentList "-NoExit", "-Command", "cd .\backend; uvicorn main:app --reload" -WindowStyle 'Minimized'
 
-# Start frontend development server
-Start-Process -FilePath "bash" -ArgumentList "-c `"cd frontend && npm run dev`""
-
-# Wait for backend server to start
-Start-Sleep -Seconds 5
-
-# Attach to the backend process
-Get-Process | Where-Object {$_.ProcessName -eq "uvicorn"} | Select-Object -First 1 | ForEach-Object {Start-Process -FilePath "powershell" -ArgumentList "-Command `"AttachConsole $($_.Id);`""}
-
-# Wait for frontend server to start
-Start-Sleep -Seconds 5
-
-# Attach to the frontend process
-Get-Process | Where-Object {$_.ProcessName -eq "npm"} | Select-Object -First 1 | ForEach-Object {Start-Process -FilePath "powershell" -ArgumentList "-Command `"AttachConsole $($_.Id);`""}
+# Start the frontend server in another new PowerShell window
+Start-Process "powershell" -ArgumentList "-NoExit", "-Command", "cd .\frontend; npm run dev" -WindowStyle 'Minimized'
