@@ -369,13 +369,13 @@
 			</Tabs.List>
 		</div>
 	</div>
-	{#if $currentStation.name != null}
+	{#if $currentStation.name != null || true}
 		<Separator orientation="horizontal"></Separator>
-		<div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class="">
-			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
+		<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->
+		<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
 
-			<TemperatureChart></TemperatureChart>
-		</div>
+		<TemperatureChart></TemperatureChart>
+		<!-- </div> -->
 	{/if}
 </Tabs.Root>
 
