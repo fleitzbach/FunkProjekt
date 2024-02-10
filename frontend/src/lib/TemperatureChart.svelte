@@ -75,7 +75,7 @@
 	}
 </script>
 
-<div class="w-full box-content flex flex-row">
+<div class="w-full box-content flex flex-row max-h-[1/3]">
 	<!-- Data Controls -->
 	<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full">
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>

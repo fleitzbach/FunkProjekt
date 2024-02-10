@@ -13,7 +13,7 @@
     addHiddenColumns,
     addSelectedRows
   } from "svelte-headless-table/plugins";
-  import { readable } from "svelte/store";
+  import { readable, writable } from "svelte/store";
   import * as Table from "$lib/components/ui/table";
   import { Button } from "$lib/components/ui/button";
   import { ArrowUpDown, ChevronDown } from "lucide-svelte";
@@ -21,7 +21,7 @@
 	import { stationList } from "./store";
 	import { toast } from "svelte-sonner";
   
-  let data = [
+  const data = [
     {
       id: "GME00126514",
       name: "NEUHAUSEN OB ECK-UNTERSCHWAND",
@@ -33,7 +33,7 @@
     }
   ];
 
-  const table = createTable(readable(data), {
+  const table = createTable(stationList, {
     page: addPagination(),
     sort: addSortBy({ disableMultiSort: true }),
     filter: addTableFilter({
@@ -113,6 +113,18 @@
         }
       }
     }),
+    table.column({
+        accessor: ({ id }) => id,
+        header: "",
+        cell: ({ value }) => {
+          return ''
+        },
+        plugins: {
+          sort: {
+            disable: true
+          }
+        }
+      }),
    
   ]);
   
@@ -136,31 +148,9 @@
     .map(([id]) => id);
     const hidableCols = ["id", "name", "distance", "latitude", "longitude", "first_year", "last_year"];
 
-  const updateList = (data) => {
-    data = data.map((station) => {
-      return {
-        id: station.id,
-        name: station.name,
-        first_year: station.first_year,
-        last_year: station.last_year,
-        latitude: station.latitude,
-        longitude: station.longitude,
-        distance: station.distance,
-      };
-    });
-    toast("Data updated");
-    console.log(data);
-  };
 
   onMount(() => {
-    const unsubscribe = stationList.subscribe((data) => {
-        updateList(data);
-      });
-
-      // Cleanup on component destroy
-      return () => {
-        unsubscribe();
-      };
+    
   });
   
 </script>

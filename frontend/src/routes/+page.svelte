@@ -141,6 +141,15 @@
 			radius: 0,
 			interactive: false
 		});
+
+    const mapResizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect;
+        map.invalidateSize();
+      }
+    });
+
+    mapResizeObserver.observe(document.querySelector('#map'));
 	});
 
 	async function viewData(station) {
@@ -334,7 +343,6 @@
 					id="map"
 					class="h-full w-full outline-none"
 					use:mapAction
-					on:resize={map.invalidateSize()}
 				></div>
 				<!-- Zoom Controls -->
 				<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
@@ -374,7 +382,7 @@
 				</Tabs.List>
 			</div>
 		</div>
-		{#if $currentStation.name != null || true}
+		{#if $currentStation.name != null}
 			<Separator orientation="horizontal"></Separator>
 			<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->
 			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
