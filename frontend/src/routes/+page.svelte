@@ -7,7 +7,6 @@
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import MarkerPopup from '$lib/MarkerPopup.svelte';
 	import { Input } from '$lib/components/ui/input';
-	import { Slider } from '$lib/components/ui/slider';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator';
@@ -18,12 +17,11 @@
 	import { setMode, mode, ModeWatcher } from 'mode-watcher';
 	import { API_URL } from '../config';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { fly, slide } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 	import TemperatureChart from '$lib/TemperatureChart.svelte';
-	import { dataStore, currentStation } from '$lib/store';
+	import { dataStore, stationList, currentStation } from '$lib/store';
 	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
+  import StationTable from '$lib/StationTable.svelte';
 	let map;
 	let circle;
 	let coordinates;
@@ -168,6 +166,7 @@
 				if (endYear) {
 					dataUrl += `&end=${endYear}`;
 				}
+        stationList.fetchStationList(dataUrl);
 				fetch(dataUrl, {
 					headers: {}
 				}).then((res) => {
@@ -363,7 +362,11 @@
 					>
 				</div>
 			</Tabs.Content>
-			<Tabs.Content value="list" class="relative w-full h-full m-0"></Tabs.Content>
+			<Tabs.Content value="list" class="relative w-full h-full m-0">
+        <div class='p-5'>
+          <StationTable></StationTable>
+        </div>
+      </Tabs.Content>
 			<div class="absolute top-0 right-0 p-5 z-[1000]">
 				<Tabs.List>
 					<Tabs.Trigger value="map">Map</Tabs.Trigger>

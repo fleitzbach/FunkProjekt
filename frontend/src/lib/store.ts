@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 
-// Server Response Data
+// Temperature Data
 function createDataStore() {
   const { subscribe, set } = writable([]);
 
@@ -16,6 +16,20 @@ function createDataStore() {
 }
 export const dataStore = createDataStore();
 
+// Station List Data
+function createStationListStore() {
+  const { subscribe, set } = writable([]);
+
+  return {
+    subscribe,
+    fetchStationList: async (url) => {
+      const response = await fetch(url);
+      const newStationList = await response.json();
+      set(newStationList);
+    },
+  };
+}
+export const stationList = createStationListStore();
 
 // Current Station
 function createCurrentStationStore() {
