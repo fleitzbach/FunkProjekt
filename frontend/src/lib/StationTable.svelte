@@ -34,7 +34,7 @@
   ];
 
   const table = createTable(stationList, {
-    page: addPagination(),
+    // page: addPagination(),
     sort: addSortBy({ disableMultiSort: true }),
     filter: addTableFilter({
       fn: ({ filterValue, value }) => value.includes(filterValue)
@@ -137,7 +137,7 @@
     flatColumns,
     rows
   } = table.createViewModel(columns);
-  const { pageIndex, hasNextPage, hasPreviousPage } = pluginStates.page;
+  // const { pageIndex, hasNextPage, hasPreviousPage } = pluginStates.page;
   const { filterValue } = pluginStates.filter;
   const { hiddenColumnIds } = pluginStates.hide;
   const { selectedDataIds } = pluginStates.select;
@@ -156,7 +156,7 @@
 </script>
 
 
-<div>
+<div class=''>
   <div class="pb-4">
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>
@@ -235,7 +235,7 @@
       </Table.Body>
     </Table.Root>
   </div>
-  <div class="flex items-center justify-end space-x-4 py-4">
+  <!-- <div class="flex items-center justify-end space-x-4 py-4">
     <Button
       variant="outline"
       size="sm"
@@ -248,5 +248,5 @@
       disabled={!$hasNextPage}
       on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
     >
-  </div>
+  </div> -->
 </div>
