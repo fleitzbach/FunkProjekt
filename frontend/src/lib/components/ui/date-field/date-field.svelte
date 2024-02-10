@@ -9,7 +9,7 @@
 	export { className as class };
 </script>
 
-<DateFieldPrimitive.Root>
+<DateFieldPrimitive.Root locale='de'>
 	<div>
 		<DateFieldPrimitive.Label class="text-sm font-semibold">
 			<slot />
