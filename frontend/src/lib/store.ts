@@ -1,5 +1,7 @@
 import { writable } from 'svelte/store';
 
+
+// Server Response Data
 function createDataStore() {
   const { subscribe, set } = writable([]);
 
@@ -12,9 +14,10 @@ function createDataStore() {
     },
   };
 }
-
 export const dataStore = createDataStore();
 
+
+// Current Station
 function createCurrentStationStore() {
   const { subscribe, set } = writable([]);
 
