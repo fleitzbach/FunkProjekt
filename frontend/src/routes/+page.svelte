@@ -22,13 +22,14 @@
 	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import StationTable from '$lib/StationTable.svelte';
+	import type { Stations } from '$lib/types';
 	let map;
 	let circle;
 	let coordinates;
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
-	let points;
+	let points: Stations[] = [];
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
@@ -142,6 +143,8 @@
 			interactive: false
 		});
 
+		stationList.subscribe(updateMarkers);
+
 		const mapResizeObserver = new ResizeObserver((entries) => {
 			for (let entry of entries) {
 				const { width, height } = entry.contentRect;
@@ -152,103 +155,62 @@
 		mapResizeObserver.observe(document.querySelector('#map'));
 	});
 
-	async function viewData(station) {
-		currentStation.setCurrentStation(station);
-		let start = '2000-01-01';
-		let end = '2000-12-31';
-		let dataUrl = `${API_URL}/data/${station.id}/${'month'}?start=${start}&end=${end}`;
-		dataStore.fetchData(dataUrl);
-	}
-
 	async function search(e) {
+		let dataUrl = `${API_URL}/stations`;
+		dataLoading = true;
+		const lat = parseFloat(latitude);
+		const lng = parseFloat(longitude);
+
 		if (searchByCoordinates) {
-			let lat = parseFloat(latitude);
-			let lng = parseFloat(longitude);
-			console.log(lat, lng, radius);
-
-			if (!isNaN(lat) && !isNaN(lng)) {
-				dataLoading = true;
-				let dataUrl = `${API_URL}/stations?latitude=${lat}&longitude=${lng}&radius=${radius}&selection=${100}`;
-				if (startYear) {
-					dataUrl += `&start=${startYear}`;
-				}
-				if (endYear) {
-					dataUrl += `&end=${endYear}`;
-				}
-				stationList.fetchStationList(dataUrl);
-				fetch(dataUrl, {
-					headers: {}
-				}).then((res) => {
-					res.json().then((data) => {
-						toast(`Found ${data.length} stations.`);
-						dataLoading = false;
-						markers.clearLayers();
-						points = data;
-						data.forEach((point) => {
-							let marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
-							const popupContent = document.createElement('div');
-							new MarkerPopup({
-								target: popupContent,
-								props: {
-									name: point.name
-								}
-							});
-							popupContent.addEventListener('click', (e) => {
-								if ((e.target as HTMLElement).dataset.action === 'viewData') {
-									viewData(point);
-								}
-							});
-							marker.bindPopup(popupContent);
-
-							markers.addLayer(marker);
-						});
-					});
-
-					circle.setRadius(radius * 1000);
-					circle.setLatLng([lat, lng]);
-					circle.addTo(map);
-					map.fitBounds(circle.getBounds());
-				});
+			if (isNaN(lat) || isNaN(lng)) {
+				toast('Please enter valid coordinates.');
+				dataLoading = false;
+				return;
 			}
+			updateCircle(lat, lng, radius);
+			map.fitBounds(circle.getBounds());
+			stationList.fetchStationsByCoords(
+				lat,
+				lng,
+				radius,
+				startYear || undefined,
+				endYear || undefined
+			);
 		} else {
 			if (!searchName) {
 				toast('Please enter a station name.');
+				dataLoading = false;
 				return;
 			}
-			dataLoading = true;
-			let dataUrl = `${API_URL}/stations/${searchName}?selection=${100}`;
-			fetch(dataUrl, {
-				headers: {}
-			}).then((res) => {
-				res.json().then((data) => {
-					toast(`Found ${data.length} stations.`);
-					dataLoading = false;
-					markers.clearLayers();
-					points = data;
-					data.forEach((point) => {
-						let marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
-						const popupContent = document.createElement('div');
-						new MarkerPopup({
-							target: popupContent,
-							props: {
-								name: point.name
-							}
-						});
-						popupContent.addEventListener('click', (e) => {
-							if ((e.target as HTMLElement).dataset.action === 'viewData') {
-								viewData(point);
-							}
-						});
-						marker.bindPopup(popupContent);
 
-						markers.addLayer(marker);
-						map.fitBounds(markers.getBounds());
-					});
-				});
-
-				circle.remove();
-			});
+			circle.remove();
+			stationList.fetchStationsByName(searchName);
 		}
+		dataLoading = false;
+	}
+
+	function updateMarkers(stations) {
+		markers.clearLayers();
+		points = stations;
+		stations.forEach((point) => {
+			const marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
+			const popupContent = document.createElement('div');
+			new MarkerPopup({
+				target: popupContent,
+				props: { station: point }
+			});
+			marker.bindPopup(popupContent);
+			markers.addLayer(marker);
+		});
+		if (searchName) {
+			map.fitBounds(markers.getBounds());
+		}
+	}
+
+	function updateCircle(lat, lng, radius) {
+		circle.setRadius(radius * 1000);
+		circle.setLatLng([lat, lng]);
+		circle.addTo(map);
 	}
 </script>
 
@@ -377,7 +339,7 @@
 				</Tabs.List>
 			</div>
 		</div>
-		{#if $currentStation.name != null}
+		{#if $currentStation != null}
 			<Separator orientation="horizontal"></Separator>
 			<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->
 			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
@@ -388,9 +350,8 @@
 	</Tabs.Root>
 
 	<Toaster />
-
-	<ModeWatcher />
 </main>
+<ModeWatcher />
 
 <style>
 	#map {

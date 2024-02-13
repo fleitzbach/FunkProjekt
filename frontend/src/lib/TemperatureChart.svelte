@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
-	import { dataStore, currentStation } from './store';
+	import { dataStore, currentStation, dataSettings } from './store';
 	import { Input } from './components/ui/input';
 	import { Button } from './components/ui/button';
 	import { API_URL } from '../config';
@@ -9,12 +9,13 @@
 	import { Label } from './components/ui/label';
 	import { DateField } from './components/ui/date-field';
 	import { Root } from 'postcss';
+	import type { DataSettings } from './types';
 	let chartElement;
 	let chart;
-	let dataControls = {
+	
+	let dataControls: DataSettings = {
 		interval: 'year'
 	};
-	let selectedInterval
 
 	onMount(() => {
 		// Init empty chart
@@ -36,6 +37,17 @@
 						borderColor: '#00f'
 					}
 				]
+			},
+
+			options:{
+				animation: false,
+				plugins: {
+					decimation: {
+						enabled: true,
+						algorithm: 'lttb',
+						samples: 2
+					}
+				}
 			}
 		});
 
@@ -62,16 +74,17 @@
 
 	function updateData() {
 		console.log(dataControls);
-		let start = $currentStation.first_year + '-01-01';
-		let end = $currentStation.last_year + '-12-31';
+
 		let id = $currentStation.id;
-		let dataUrl = `${API_URL}/data/${id}/${dataControls.interval}?start=${start}&end=${end}`;
-		dataStore.fetchData(dataUrl);
+		dataSettings.setSettings(dataControls);
+		dataStore.fetchTemperatureData(id);
 	}
 
 	function intervalChange(option) {
 		let o = option as Option<T>;
-    if (o) dataControls.interval = o.value;
+    	if (o) {
+			dataControls.interval = o.value;
+		}
 	}
 
 	function close() {
@@ -85,7 +98,7 @@
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
 		<div class='w-full'>
 			<Label for='data-interval' class='font-semibold'>Data interval</Label>
-			<Select.Root bind:selected={selectedInterval} onSelectedChange={intervalChange}>
+			<Select.Root onSelectedChange={intervalChange}>
 				<Select.Trigger>
 					<Select.Value placeholder='Interval'>
 					</Select.Value>

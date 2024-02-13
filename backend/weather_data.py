@@ -101,7 +101,8 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     df = get_data_from_id(id)
     #print("get_data_from_id --- %s seconds ---" % (time.time() - start_time))
     #start_time = time.time()
-    df = filter_data(df, start, end)
+    if start != None and end != None:
+        df = filter_data(df, start, end)
     #print("filter_data --- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
     df = calc_mean(df, rythm)

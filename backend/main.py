@@ -36,7 +36,7 @@ def reload_stations():
     return "Stations reloaded"
 
 @app.get("/data/{id}/{rythm}")
-def get_data_of_year(id: str, rythm: str,start: str, end: str):
+def get_data_of_year(id: str, rythm: str,start: Optional[str] = None, end: Optional[str] = None):
 
     df = weather_data.get_weather_data(id, start, end, rythm)
 
