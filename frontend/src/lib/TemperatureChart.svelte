@@ -25,13 +25,13 @@
 				labels: [],
 				datasets: [
 					{
-						label: 'Maximum Temperature',
+						label: 'Maximum Temperature (°C)',
 						data: [],
 						tension: 0.2,
 						borderColor: '#ef4444'
 					},
 					{
-						label: 'Minimum Temperature',
+						label: 'Minimum Temperature (°C)',
 						data: [],
 						tension: 0.2,
 						borderColor: '#00f'
@@ -74,10 +74,21 @@
 
 	function updateData() {
 		console.log(dataControls);
-
-		let id = $currentStation.id;
-		dataSettings.setSettings(dataControls);
-		dataStore.fetchTemperatureData(id);
+		let settings: DataSettings = {interval: dataControls.interval}
+		let dateParser = /(\d{1,2}).(\d{1,2}).(\d{4})/
+		
+		if (dataControls.start) {
+			let start = new Date(dataControls.start.replace(dateParser, '$3-$2-$1'));
+			settings.start = start.toISOString().split('T')[0];
+			dataControls.start = start.toLocaleDateString('de-DE');
+		}
+		if (dataControls.end) {
+			let end = new Date(dataControls.end.replace(dateParser, '$3-$2-$1'));
+			settings.end = end.toISOString().split('T')[0];
+			dataControls.end = end.toLocaleDateString('de-DE');
+		}
+		dataSettings.setSettings(settings);
+		dataStore.fetchTemperatureData($currentStation.id);
 	}
 
 	function intervalChange(option) {
@@ -111,9 +122,16 @@
 				</Select.Content>
 			</Select.Root>
 		</div>
-		<DateField>
-			Start Date
-		</DateField>
+		<div class="flex flex-row items-center gap-5">
+			<div>
+				<Label for="start" class="font-semibold">Start date</Label>
+				<Input type="text" id="start" bind:value={dataControls.start} class="w-full" />
+			</div>
+			<div>
+				<Label for="end" class="font-semibold">End date</Label>
+				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" />
+			</div>
+		</div>
 		<Button on:click={updateData}>Update Data</Button>
 	</div>
 	<!-- Visualisation -->

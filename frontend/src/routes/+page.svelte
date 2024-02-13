@@ -167,8 +167,7 @@
 				dataLoading = false;
 				return;
 			}
-			updateCircle(lat, lng, radius);
-			map.fitBounds(circle.getBounds());
+			
 			stationList.fetchStationsByCoords(
 				lat,
 				lng,
@@ -186,7 +185,7 @@
 			circle.remove();
 			stationList.fetchStationsByName(searchName);
 		}
-		dataLoading = false;
+		dataLoading = true;
 	}
 
 	function updateMarkers(stations) {
@@ -201,10 +200,13 @@
 			});
 			marker.bindPopup(popupContent);
 			markers.addLayer(marker);
+			updateCircle(latitude, longitude, radius);
+			map.fitBounds(circle.getBounds());
 		});
 		if (searchName) {
 			map.fitBounds(markers.getBounds());
 		}
+		dataLoading = false;
 	}
 
 	function updateCircle(lat, lng, radius) {

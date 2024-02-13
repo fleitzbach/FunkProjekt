@@ -2,14 +2,19 @@
 	import { cn } from '$lib/utils';
 	import { DateField as DateFieldPrimitive } from 'bits-ui';
 
-	type $$Props = DateFieldPrimitive.InputProps;
-
-	let className: $$Props['class'] = undefined;
+	let className = undefined;
 
 	export { className as class };
+	let value;
+
+	export let date: string;
+	function handleValueChange() {
+		date = new Date(value.year, value.month, value.day).toDateString();
+		console.log(value)
+	}
 </script>
 
-<DateFieldPrimitive.Root locale='de'>
+<DateFieldPrimitive.Root locale='de' bind:value={value} onValueChange={handleValueChange}>
 	<div>
 		<DateFieldPrimitive.Label class="text-sm font-semibold">
 			<slot />
