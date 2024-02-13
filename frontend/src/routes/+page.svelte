@@ -21,7 +21,7 @@
 	import { dataStore, stationList, currentStation } from '$lib/store';
 	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
-  import StationTable from '$lib/StationTable.svelte';
+	import StationTable from '$lib/StationTable.svelte';
 	let map;
 	let circle;
 	let coordinates;
@@ -142,14 +142,14 @@
 			interactive: false
 		});
 
-    const mapResizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        const { width, height } = entry.contentRect;
-        map.invalidateSize();
-      }
-    });
+		const mapResizeObserver = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				const { width, height } = entry.contentRect;
+				map.invalidateSize();
+			}
+		});
 
-    mapResizeObserver.observe(document.querySelector('#map'));
+		mapResizeObserver.observe(document.querySelector('#map'));
 	});
 
 	async function viewData(station) {
@@ -175,7 +175,7 @@
 				if (endYear) {
 					dataUrl += `&end=${endYear}`;
 				}
-        stationList.fetchStationList(dataUrl);
+				stationList.fetchStationList(dataUrl);
 				fetch(dataUrl, {
 					headers: {}
 				}).then((res) => {
@@ -254,9 +254,9 @@
 
 <main>
 	<Tabs.Root value="map" class="flex flex-col h-full w-full">
-		<div class="relative w-full min-h-0 min-w-0 m-0 flex flex-row">
+		<div class="relative w-full h-full min-h-0 min-w-0 m-0 flex flex-row">
 			<!-- Search settings -->
-			<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] min-w-0 w-full">
+			<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full">
 				<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
 				<div>
 					<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
@@ -295,7 +295,6 @@
 								<Label for="start" class="font-semibold">Start year</Label>
 								<Input type="text" id="start" bind:value={startYear} class="w-full" />
 							</div>
-							<div>to</div>
 							<div>
 								<Label for="end" class="font-semibold">End year</Label>
 								<Input type="text" id="end" bind:value={endYear} class="w-full" />
@@ -338,14 +337,9 @@
 			</div>
 			<Separator orientation="vertical"></Separator>
 
- 
-      <!-- Map View -->
-      <Tabs.Content value="map" class="relative w-full h-full m-0 ">
-				<div
-					id="map"
-					class="h-full w-full outline-none"
-					use:mapAction
-				></div>
+			<!-- Map View -->
+			<Tabs.Content value="map" class="relative w-full h-full m-0 ">
+				<div id="map" class="h-full w-full outline-none" use:mapAction></div>
 				<!-- Zoom Controls -->
 				<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
 					<Button variant="outline" class="shadow w-10 p-0 bg-background" on:click={map.zoomIn(1)}
@@ -372,18 +366,17 @@
 					>
 				</div>
 			</Tabs.Content>
-			<Tabs.Content value="list" class="relative w-full h-full m-0">
-        <div class='p-5'>
-          <StationTable></StationTable>
-        </div>
-      </Tabs.Content>
+			<!-- List View -->
+			<Tabs.Content value="list" class="w-full min-w-0 h-full m-0 p-5 box-border">
+				<StationTable></StationTable>
+			</Tabs.Content>
 			<div class="absolute top-0 right-0 p-5 z-[1000]">
 				<Tabs.List>
 					<Tabs.Trigger value="map">Map</Tabs.Trigger>
 					<Tabs.Trigger value="list">List</Tabs.Trigger>
 				</Tabs.List>
 			</div>
-    </div>
+		</div>
 		{#if $currentStation.name != null}
 			<Separator orientation="horizontal"></Separator>
 			<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->

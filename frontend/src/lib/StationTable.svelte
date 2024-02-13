@@ -21,18 +21,6 @@
 	import { stationList } from "./store";
 	import { toast } from "svelte-sonner";
   
-  const data = [
-    {
-      id: "GME00126514",
-      name: "NEUHAUSEN OB ECK-UNTERSCHWAND",
-      first_year: 1993,
-      last_year: 2003,
-      latitude: 47.9531,
-      longitude: 9.8842,
-      distance: 5.2328827734,
-    }
-  ];
-
   const table = createTable(stationList, {
     // page: addPagination(),
     sort: addSortBy({ disableMultiSort: true }),
@@ -64,6 +52,9 @@
     table.column({
       accessor: "first_year",
       header: "First Year",
+      cell: ({ value }) => {
+        return value == null ? "–" : value;
+      },
       plugins: {
         filter: {
           exclude: true
@@ -73,6 +64,9 @@
     table.column({
       accessor: "last_year",
       header: "Last Year",
+      cell: ({ value }) => {
+        return value == null ? "–" : value;
+      },
       plugins: {
         filter: {
           exclude: true
@@ -103,7 +97,8 @@
       cell: ({ value }) => {
         const formatted = new Intl.NumberFormat("en-US", {
           style: "unit",
-          unit: "kilometer"
+          unit: "kilometer",
+          unitDisplay: "short"
         }).format(value);
         return formatted;
       },
@@ -156,7 +151,6 @@
 </script>
 
 
-<div class=''>
   <div class="pb-4">
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>
@@ -176,7 +170,7 @@
     </DropdownMenu.Root>
   </div>
 
-  <div class="rounded-md border">
+  <div class="rounded-md border flex flex-row h-[calc(100%-3.5rem)] min-h-0">
     <Table.Root {...$tableAttrs}>
       <Table.Header>
         {#each $headerRows as headerRow}
@@ -205,7 +199,7 @@
           </Subscribe>
         {/each}
       </Table.Header>
-      <Table.Body {...$tableBodyAttrs}>
+      <Table.Body {...$tableBodyAttrs} >
         {#each $pageRows as row (row.id)}
           <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
             <Table.Row
@@ -234,7 +228,6 @@
         {/each}
       </Table.Body>
     </Table.Root>
-  </div>
   <!-- <div class="flex items-center justify-end space-x-4 py-4">
     <Button
       variant="outline"

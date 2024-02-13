@@ -40,6 +40,9 @@ function createCurrentStationStore() {
     setCurrentStation: async (station) => {
       set(station);
     },
+    clearCurrentStation: () => {
+      set([]);
+    }
   };
 }
 

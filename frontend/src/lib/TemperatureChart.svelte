@@ -73,14 +73,17 @@
 		let o = option as Option<T>;
     if (o) dataControls.interval = o.value;
 	}
+
+	function close() {
+		currentStation.clearCurrentStation();
+	}
 </script>
 
-<div class="w-full box-content flex flex-row max-h-[1/3]">
+<div class="w-full flex flex-row ">
 	<!-- Data Controls -->
-	<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full">
+	<div class="p-5 flex flex-col gap-5 items-baseline min-w-[300px] max-w-[300px] w-full">
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
 		<div class='w-full'>
-
 			<Label for='data-interval' class='font-semibold'>Data interval</Label>
 			<Select.Root bind:selected={selectedInterval} onSelectedChange={intervalChange}>
 				<Select.Trigger>
@@ -101,8 +104,11 @@
 		<Button on:click={updateData}>Update Data</Button>
 	</div>
 	<!-- Visualisation -->
-	<div class="w-full h-full p-5">
-		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
-		<canvas bind:this={chartElement} class="h-full w-full"></canvas>
+	<div class="w-full p-5">
+		<div class='flex flex-row justify-between'>
+			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
+			<Button on:click={close} variant='link'>x</Button>
+		</div>
+		<canvas bind:this={chartElement} class="h-full max-h-96 w-full"></canvas>
 	</div>
 </div>
