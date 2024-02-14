@@ -13,10 +13,12 @@
 	
 	let chartElement;
 	let chart;
-	
+		
 	let dataControls: DataSettings = {
-		interval: 'year'
+		interval: 'month'
 	};
+
+	let selectedInterval = {value: dataControls.interval, label: dataControls.interval.charAt(0).toUpperCase() + dataControls.interval.slice(1)};
 
 	onMount(() => {
 		// Init empty chart
@@ -48,6 +50,44 @@
 						algorithm: 'lttb',
 						samples: 2
 					}
+				},
+				onClick: function(event, chartElements) {
+                	if (chartElements.length > 0) {
+                    	const elementIndex = chartElements[0].index;
+                    	const dataPoint = this.data.labels[elementIndex];
+						if (dataControls.interval == 'year') {
+							dataControls.start = `01.01.${dataPoint}`;
+							dataControls.end = `30.12.${dataPoint}`;
+							dataControls.interval = 'month';
+							updateData();
+						} else if (dataControls.interval == 'month') {
+							let datapoint_split = dataPoint.split("-")
+							let datapoint_year = datapoint_split[0];
+							let datapoint_month = datapoint_split[1];
+							let isLeapYear = (datapoint_year % 4 === 0 && datapoint_year % 100 !== 0) || (datapoint_year % 400 === 0);
+							let datapoint_endDay;
+							if (datapoint_month === "01" || datapoint_month === "03" || datapoint_month === "05" || datapoint_month === "07" || datapoint_month === "08" || datapoint_month === "10" || datapoint_month === "12") {
+								datapoint_endDay = 31;
+							} else if (datapoint_month === "04" || datapoint_month === "06" || datapoint_month === "09" || datapoint_month === "11") {
+								datapoint_endDay = 30;
+							} else if (datapoint_month === "02") {
+								datapoint_endDay = isLeapYear ? 29 : 28;
+							} else {
+								// Handle invalid month
+								console.error('Invalid month:', datapoint_month);
+								return;
+							}
+							dataControls.start = `01.${datapoint_month}.${datapoint_year}`;
+							dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
+							dataControls.interval = 'day';
+							updateData();
+						} else {
+							console.log(`Datum: ${dataPoint}`)
+						}
+						
+                    	// Hier könnten Sie die Daten ausgeben, z.B. in der Konsole oder in einem UI-Element
+                    	console.log(`Datum: ${dataPoint}`);
+					}
 				}
 			}
 		});
@@ -63,7 +103,7 @@
 			if (chart) chart.destroy();
 		};
 	});
-
+	
 	function updateChart(data) {
 		if (chart && data) {
 			chart.data.labels = data.map((row) => row.date);
@@ -110,9 +150,9 @@
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
 		<div class='w-full'>
 			<Label for='data-interval' class='font-semibold'>Data interval</Label>
-			<Select.Root onSelectedChange={intervalChange}>
+			<Select.Root onSelectedChange={intervalChange} bind:selected={selectedInterval}>
 				<Select.Trigger>
-					<Select.Value placeholder='Interval'>
+					<Select.Value>
 					</Select.Value>
 				</Select.Trigger>
 				<Select.Content>
