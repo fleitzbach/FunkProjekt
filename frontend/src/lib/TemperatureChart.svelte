@@ -10,14 +10,24 @@
 	import { DateField } from './components/ui/date-field';
 	import { Root } from 'postcss';
 	import type { DataSettings } from './types';
+	import { each } from 'chart.js/helpers';
 	
 	let chartElement;
 	let chart;
 	
 	let dataControls: DataSettings = {
-		interval: 'year'
+		interval: $dataSettings.interval
 	};
 
+	
+	let intervals = [
+		{value: 'year', label: 'Year', disabled: false},
+		{value: 'season', label: 'Season', disabled: true},
+		{value: 'month', label: 'Month', disabled: false},
+		{value: 'day', label: 'Day', disabled: false}
+	];
+	let selectedInterval = intervals.find(interval => interval.value === dataControls.interval);
+	
 	onMount(() => {
 		// Init empty chart
 		chart = new Chart(chartElement, {
@@ -110,16 +120,15 @@
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
 		<div class='w-full'>
 			<Label for='data-interval' class='font-semibold'>Data interval</Label>
-			<Select.Root onSelectedChange={intervalChange}>
+			<Select.Root bind:selected={selectedInterval} onSelectedChange={intervalChange}>
 				<Select.Trigger>
 					<Select.Value placeholder='Interval'>
 					</Select.Value>
 				</Select.Trigger>
 				<Select.Content>
-					<Select.Item value='year'>Year</Select.Item>
-					<Select.Item value='season'>Season</Select.Item>
-					<Select.Item value='month'>Month</Select.Item>
-					<Select.Item value='day'>Day</Select.Item>
+					{#each intervals as interval}
+						<Select.Item value={interval.value} disabled={interval.disabled}>{interval.label}</Select.Item>
+					{/each}
 				</Select.Content>
 			</Select.Root>
 		</div>
