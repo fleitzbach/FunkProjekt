@@ -1,6 +1,7 @@
 import { get, writable } from 'svelte/store';
 import { API_URL } from '../config';
 import type { DataSettings, Station } from './types';
+import { toast } from 'svelte-sonner';
 
 // Temperature Data
 function createDataStore() {
@@ -79,6 +80,7 @@ function createCurrentStationStore() {
 	return {
 		subscribe,
 		setCurrentStation: async (station) => {
+			toast(`Loading data for ${station.name}`);
 			set(station);
 		},
 		clearCurrentStation: () => {
