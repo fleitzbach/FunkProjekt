@@ -341,7 +341,7 @@
 				</Tabs.List>
 			</div>
 		</div>
-		{#if $currentStation != null}
+		{#if $currentStation.id != ""}
 			<Separator orientation="horizontal"></Separator>
 			<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->
 			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->

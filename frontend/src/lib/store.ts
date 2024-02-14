@@ -65,7 +65,16 @@ export const stationList = createStationListStore();
 
 // Current Station
 function createCurrentStationStore() {
-	const { subscribe, set } = writable<Station>(null);
+	const { subscribe, set } = writable<Station>(
+		{
+			id: '',
+			name: '',
+			latitude: 0,
+			longitude: 0,
+			first_year: 0,
+			last_year: 0,
+		}
+	);
 
 	return {
 		subscribe,
@@ -73,7 +82,14 @@ function createCurrentStationStore() {
 			set(station);
 		},
 		clearCurrentStation: () => {
-			set(null);
+			set({
+				id: '',
+				name: '',
+				latitude: 0,
+				longitude: 0,
+				first_year: 0,
+				last_year: 0,
+			});
 		}
 	};
 }

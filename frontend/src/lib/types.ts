@@ -11,5 +11,5 @@ export type Station = {
 	longitude: number;
 	first_year: number;
 	last_year: number;
-	distance: number;
+	distance?: number;
 };

@@ -10,6 +10,7 @@
 	import { DateField } from './components/ui/date-field';
 	import { Root } from 'postcss';
 	import type { DataSettings } from './types';
+	
 	let chartElement;
 	let chart;
 	
@@ -64,7 +65,7 @@
 	});
 
 	function updateChart(data) {
-		if (chart) {
+		if (chart && data) {
 			chart.data.labels = data.map((row) => row.date);
 			chart.data.datasets[0].data = data.map((row) => row.TMAX);
 			chart.data.datasets[1].data = data.map((row) => row.TMIN);
