@@ -11,23 +11,26 @@
 	import { Root } from 'postcss';
 	import type { DataSettings } from './types';
 	import { each } from 'chart.js/helpers';
-	
+
 	let chartElement;
 	let chart;
-	
+
 	let dataControls: DataSettings = {
 		interval: $dataSettings.interval
 	};
 
-	
+	$: dataControls.interval = $dataSettings.interval;
+
 	let intervals = [
-		{value: 'year', label: 'Year', disabled: false},
-		{value: 'season', label: 'Season', disabled: true},
-		{value: 'month', label: 'Month', disabled: false},
-		{value: 'day', label: 'Day', disabled: false}
+		{ value: 'year', label: 'Year', disabled: false },
+		{ value: 'season', label: 'Season', disabled: true },
+		{ value: 'month', label: 'Month', disabled: false },
+		{ value: 'day', label: 'Day', disabled: false }
 	];
-	let selectedInterval = intervals.find(interval => interval.value === dataControls.interval);
-	
+
+	let selectedInterval
+	$: selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
+
 	onMount(() => {
 		// Init empty chart
 		chart = new Chart(chartElement, {
@@ -50,13 +53,66 @@
 				]
 			},
 
-			options:{
+			options: {
 				animation: false,
 				plugins: {
 					decimation: {
 						enabled: true,
 						algorithm: 'lttb',
 						samples: 2
+					}
+				},
+				onClick: function (event, chartElements) {
+					if (chartElements.length > 0) {
+						const elementIndex = chartElements[0].index;
+						const dataPoint = this.data.labels[elementIndex];
+						if (dataControls.interval == 'year') {
+							dataControls.start = `01.01.${dataPoint}`;
+							dataControls.end = `30.12.${dataPoint}`;
+							dataControls.interval = 'month';
+							updateData();
+						} else if (dataControls.interval == 'month') {
+							let datapoint_split = dataPoint.split('-');
+							let datapoint_year = datapoint_split[0];
+							let datapoint_month = datapoint_split[1];
+							let isLeapYear =
+								(datapoint_year % 4 === 0 && datapoint_year % 100 !== 0) ||
+								datapoint_year % 400 === 0;
+							let datapoint_endDay;
+							if (
+								datapoint_month === '01' ||
+								datapoint_month === '03' ||
+								datapoint_month === '05' ||
+								datapoint_month === '07' ||
+								datapoint_month === '08' ||
+								datapoint_month === '10' ||
+								datapoint_month === '12'
+							) {
+								datapoint_endDay = 31;
+							} else if (
+								datapoint_month === '04' ||
+								datapoint_month === '06' ||
+								datapoint_month === '09' ||
+								datapoint_month === '11'
+							) {
+								datapoint_endDay = 30;
+							} else if (datapoint_month === '02') {
+								datapoint_endDay = isLeapYear ? 29 : 28;
+							} else {
+								// Handle invalid month
+								console.error('Invalid month:', datapoint_month);
+								return;
+							}
+							dataControls.start = `01.${datapoint_month}.${datapoint_year}`;
+							dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
+							dataControls.interval = 'day';
+							updateData();
+						} else {
+							console.log(`Datum: ${dataPoint}`);
+						}
+
+						// Hier könnten Sie die Daten ausgeben, z.B. in der Konsole oder in einem UI-Element
+						console.log(`Datum: ${dataPoint}`);
 					}
 				}
 			}
@@ -85,9 +141,9 @@
 
 	function updateData() {
 		console.log(dataControls);
-		let settings: DataSettings = {interval: dataControls.interval}
-		let dateParser = /(\d{1,2}).(\d{1,2}).(\d{4})/
-		
+		let settings: DataSettings = { interval: dataControls.interval };
+		let dateParser = /(\d{1,2}).(\d{1,2}).(\d{4})/;
+
 		if (dataControls.start) {
 			let start = new Date(dataControls.start.replace(dateParser, '$3-$2-$1'));
 			settings.start = start.toISOString().split('T')[0];
@@ -104,7 +160,7 @@
 
 	function intervalChange(option) {
 		let o = option as Option<T>;
-    	if (o) {
+		if (o) {
 			dataControls.interval = o.value;
 		}
 	}
@@ -114,20 +170,21 @@
 	}
 </script>
 
-<div class="w-full flex flex-row ">
+<div class="w-full flex flex-row">
 	<!-- Data Controls -->
 	<div class="p-5 flex flex-col gap-5 items-baseline min-w-[300px] max-w-[300px] w-full">
 		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
-		<div class='w-full'>
-			<Label for='data-interval' class='font-semibold'>Data interval</Label>
+		<div class="w-full">
+			<Label for="data-interval" class="font-semibold">Data interval</Label>
 			<Select.Root bind:selected={selectedInterval} onSelectedChange={intervalChange}>
 				<Select.Trigger>
-					<Select.Value placeholder='Interval'>
-					</Select.Value>
+					<Select.Value></Select.Value>
 				</Select.Trigger>
 				<Select.Content>
 					{#each intervals as interval}
-						<Select.Item value={interval.value} disabled={interval.disabled}>{interval.label}</Select.Item>
+						<Select.Item value={interval.value} disabled={interval.disabled}
+							>{interval.label}</Select.Item
+						>
 					{/each}
 				</Select.Content>
 			</Select.Root>
@@ -146,9 +203,9 @@
 	</div>
 	<!-- Visualisation -->
 	<div class="w-full p-5">
-		<div class='flex flex-row justify-between'>
+		<div class="flex flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
-			<Button on:click={close} variant='link'>x</Button>
+			<Button on:click={close} variant="link">x</Button>
 		</div>
 		<canvas bind:this={chartElement} class="h-full max-h-96 w-full"></canvas>
 	</div>
