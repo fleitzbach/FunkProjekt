@@ -11,6 +11,7 @@
 	import { Root } from 'postcss';
 	import type { DataSettings } from './types';
 	import { each } from 'chart.js/helpers';
+	import { X } from 'lucide-svelte';
 
 	let chartElement;
 	let chart;
@@ -205,7 +206,7 @@
 	<div class="w-full p-5">
 		<div class="flex flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
-			<Button on:click={close} variant="link">x</Button>
+			<Button on:click={close} variant="ghost" class='aspect-square p-0'><X></X></Button>
 		</div>
 		<canvas bind:this={chartElement} class="h-full max-h-96 w-full"></canvas>
 	</div>
