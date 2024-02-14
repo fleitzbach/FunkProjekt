@@ -22,14 +22,14 @@
 	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import StationTable from '$lib/StationTable.svelte';
-	import type { Stations } from '$lib/types';
+	import type { Station } from '$lib/types';
 	let map;
 	let circle;
 	let coordinates;
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
-	let points: Stations[] = [];
+	let points: Station[] = [];
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
@@ -191,7 +191,7 @@
 	function updateMarkers(stations) {
 		markers.clearLayers();
 		points = stations;
-		stations.forEach((point) => {
+		stations.forEach((point: Station) => {
 			const marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
 			const popupContent = document.createElement('div');
 			new MarkerPopup({
@@ -220,7 +220,7 @@
 	<Tabs.Root value="map" class="flex flex-col h-full w-full">
 		<div class="relative w-full h-full min-h-0 min-w-0 m-0 flex flex-row">
 			<!-- Search settings -->
-			<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full">
+			<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full min-h-0 h-full overflow-auto">
 				<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
 				<div>
 					<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
