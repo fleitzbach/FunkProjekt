@@ -81,14 +81,16 @@
 	function onMapClick(e) {
 		let lat = e.latlng.lat.toFixed(5);
 		let lng = e.latlng.lng.toFixed(5);
-		coordinates = `${lat}, ${lng}`;
 		if (selectionMarker) {
-        	map.removeLayer(selectionMarker);
-    	}
-		selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
-		selectionMarker.addTo(map);
+			map.removeLayer(selectionMarker);
+		}
+		if (searchByCoordinates) {
+			coordinates = `${lat}, ${lng}`;
+			selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
+			selectionMarker.addTo(map);
+			toast(`Added coordinates (${lat}, ${lng}) to search-panel.`);
+		}
 
-		toast(`Added coordinates (${lat}, ${lng}) to search-panel.`);
 	}
 
 	onMount(() => {
@@ -217,9 +219,11 @@
 			});
 			marker.bindPopup(popupContent);
 			markers.addLayer(marker);
+		});
+		if (searchByCoordinates) {
 			updateCircle(latitude, longitude, radius);
 			map.fitBounds(circle.getBounds());
-		});
+		}
 		if (searchName) {
 			map.fitBounds(markers.getBounds());
 		}
