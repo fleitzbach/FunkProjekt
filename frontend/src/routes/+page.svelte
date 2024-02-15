@@ -354,6 +354,11 @@
 			<!-- List View -->
 			<Tabs.Content value="list" class="w-full min-w-0 h-full m-0 p-5 box-border">
 				<StationTable></StationTable>
+				{#if $stationList.length === 0}
+					<div class="flex flex-col items-center justify-center h-[calc(100%-6rem)]">
+						<p class="text-muted-foreground">No data.</p>
+					</div>
+				{/if}
 			</Tabs.Content>
 			<div class="absolute top-0 right-0 p-5 z-[1000]">
 				<Tabs.List>

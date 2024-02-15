@@ -172,7 +172,7 @@
 	</DropdownMenu.Root>
 </div>
 
-<div class="rounded-md flex flex-row h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
+<div class="rounded-md flex flex-row max-h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
