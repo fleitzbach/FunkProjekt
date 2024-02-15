@@ -12,6 +12,7 @@
 	import type { DataSettings } from './types';
 	import { each } from 'chart.js/helpers';
 	import { X } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
 
 	let chartElement;
 	let chart;
@@ -29,8 +30,7 @@
 		{ value: 'day', label: 'Day', disabled: false }
 	];
 
-	let selectedInterval
-	$: selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
+	let selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
 
 	onMount(() => {
 		// Init empty chart
@@ -55,7 +55,12 @@
 			},
 
 			options: {
+				responsive: true,
 				animation: false,
+				interaction: {
+					mode: 'index',
+					intersect: false
+				},
 				plugins: {
 					decimation: {
 						enabled: true,
@@ -166,6 +171,12 @@
 		}
 	}
 
+	function clearSettings() {
+		dataControls = { interval: 'year'};
+		dataSettings.clearSettings();
+		toast('cleared settings');
+	}
+
 	function close() {
 		currentStation.clearCurrentStation();
 	}
@@ -174,7 +185,10 @@
 <div class="w-full flex flex-row">
 	<!-- Data Controls -->
 	<div class="p-5 flex flex-col gap-5 items-baseline min-w-[300px] max-w-[300px] w-full">
-		<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
+		<div class='flex flex-row justify-between w-full'>
+			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
+			<Button on:click={clearSettings} variant='link' class='p-0 font-normal'>clear</Button>
+		</div>
 		<div class="w-full">
 			<Label for="data-interval" class="font-semibold">Data interval</Label>
 			<Select.Root bind:selected={selectedInterval} onSelectedChange={intervalChange}>

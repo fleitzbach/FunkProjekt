@@ -32,6 +32,9 @@ function createDataSettingsStore() {
 		subscribe,
 		setSettings: (settings: DataSettings) => {
 			set(settings);
+		},
+		clearSettings: () => {
+			set({ interval: 'year' });
 		}
 	};
 }
