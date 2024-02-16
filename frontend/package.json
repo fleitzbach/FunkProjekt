@@ -12,8 +12,6 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@amcharts/amcharts4": "^4.10.38",
-		"@amcharts/amcharts5": "^5.7.6",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-node": "^4.0.1",
 		"@sveltejs/kit": "^2.0.0",
@@ -39,11 +37,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@amcharts/amcharts5-geodata": "^5.1.2",
 		"bits-ui": "^0.14.0",
 		"chart.js": "^4.4.1",
 		"clsx": "^2.1.0",
-		"https": "^1.0.0",
 		"leaflet": "^1.9.4",
 		"leaflet.markercluster": "^1.5.3",
 		"lucide-svelte": "^0.309.0",
