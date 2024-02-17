@@ -7,15 +7,18 @@
 		addTableFilter,
 		addSelectedRows
 	} from 'svelte-headless-table/plugins';
-	import { readable, writable } from 'svelte/store';
+	import { readable, writable, derived } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { currentStation, dataStore, stationList, chartDataStore} from './store';
+	import { dataStore, stationList} from './store';
 
 	console.log(dataStore)
-	const table = createTable(dataStore, {
+
+	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
+
+
+	const table = createTable(tableData, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
 			fn: ({ filterValue, value }) => value.includes(filterValue)
