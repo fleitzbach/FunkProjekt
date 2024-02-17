@@ -78,8 +78,10 @@ def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     elif rythm == 'day':
         df = df.groupby([df['date'].dt.to_period("D"), 'element'])['data_value'].mean().reset_index()
     elif rythm == 'season':
-        df['season'] = df['date'].map(get_season)
-        df = df.groupby(['season', 'element'])['data_value'].mean().reset_index()
+        df['season'] = df['date'].apply(get_season)
+        df['year'] = df['date'].dt.year  # Füge das Jahr als separate Spalte hinzu
+        df = df.groupby(['year', 'season', 'element'])['data_value'].mean().reset_index()
+
     else:
         return 'Rythm not found'
     
@@ -109,13 +111,13 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     #print("calc_mean --- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
     if rythm == 'season':
-        df = df.pivot(index='season', columns='element', values='data_value').reset_index()
+
+        # Pivotiere die Daten für die finale Ausgabe
+        df = df.pivot_table(index=['year', 'season'], columns='element', values='data_value').reset_index()
     else:
         df['date'] = df['date'].astype(str)
         df = df.pivot(index='date', columns='element', values='data_value').reset_index()
     return df
 
-    return df
-
 if __name__ == '__main__':
-    print(get_weather_data('USW00094728', '2020-01-01', '2021-12-31', 'year').to_json(orient="records"))
+    print(get_weather_data('GME00124654', '2020-01-01', '2021-12-31', 'year').to_json(orient="records"))
