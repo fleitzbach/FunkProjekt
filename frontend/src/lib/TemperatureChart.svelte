@@ -18,7 +18,7 @@
 	import LoadingOverlay from '$lib/LoadingOverlay.svelte';
 	import 'chartjs-adapter-luxon';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import StationTable from '$lib/StationTable.svelte';
+	import Datatable from './DataTable.svelte';
 
 	let chartElement;
 	let chart;
@@ -242,7 +242,7 @@
 						<Sheet.Header>
 							<Sheet.Title>List Data</Sheet.Title>
 						</Sheet.Header>
-						<StationTable></StationTable>
+						<Datatable></Datatable>
 					</Sheet.Content>
 				</Sheet.Root>
 				<Button on:click={close} variant="ghost" class="aspect-square p-0"><X></X></Button>
