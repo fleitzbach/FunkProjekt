@@ -93,6 +93,16 @@
 
 	}
 
+	$: if (!searchByCoordinates) {
+		if (selectionMarker) {
+			selectionMarker.setOpacity(0);
+		}
+	} else if (searchByCoordinates) {
+		if (selectionMarker) {
+			selectionMarker.setOpacity(1);
+		}
+	}
+
 	onMount(() => {
 		map.on('click', onMapClick);
 
@@ -186,6 +196,15 @@
 				dataLoading = false;
 				return;
 			}
+
+			if (selectionMarker) {
+				map.removeLayer(selectionMarker);
+			}
+
+			// Add Marker to Search Coordinates
+			coordinates = `${lat}, ${lng}`;
+			selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
+			selectionMarker.addTo(map);
 			
 			stationList.fetchStationsByCoords(
 				lat,
@@ -194,6 +213,7 @@
 				startYear || undefined,
 				endYear || undefined
 			);
+
 		} else {
 			if (!searchName) {
 				toast('Please enter a station name.');
@@ -223,6 +243,7 @@
 		if (searchByCoordinates) {
 			updateCircle(latitude, longitude, radius);
 			map.fitBounds(circle.getBounds());
+			
 		}
 		if (searchName) {
 			map.fitBounds(markers.getBounds());
