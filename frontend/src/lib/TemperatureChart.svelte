@@ -15,10 +15,10 @@
 	import { X } from 'lucide-svelte';
 	import { LucideArrowUpRightSquare } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
-	import LoadingOverlay from './loadingOverlay.svelte';
+	import LoadingOverlay from '$lib/LoadingOverlay.svelte';
 	import 'chartjs-adapter-luxon';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import StationTable from '$lib/Datatable.svelte';
+	import StationTable from '$lib/StationTable.svelte';
 
 	let chartElement;
 	let chart;
@@ -62,7 +62,6 @@
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
-				animation: true,
 				interaction: {
 					mode: 'index',
 					intersect: false
