@@ -14,11 +14,10 @@
 	import SliderWithInput from '$lib/components/SliderWithInput.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { toast } from 'svelte-sonner';
-	import { setMode, mode, ModeWatcher } from 'mode-watcher';
-	import { API_URL } from '../config';
+	import { mode, ModeWatcher } from 'mode-watcher';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import TemperatureChart from '$lib/TemperatureChart.svelte';
-	import { dataStore, stationList, currentStation } from '$lib/store';
+	import {  stationList, currentStation } from '$lib/store';
 	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import StationTable from '$lib/StationTable.svelte';
@@ -181,7 +180,11 @@
 			interactive: false
 		});
 
-		stationList.subscribe(updateMarkers);
+		stationList.subscribe((data) => {
+			if (latitude && longitude) {
+				updateMarkers(data)
+			}
+		});
 
 		const mapResizeObserver = new ResizeObserver((entries) => {
 			for (let entry of entries) {
@@ -251,7 +254,6 @@
 		if (searchByCoordinates) {
 			updateCircle(latitude, longitude, radius);
 			map.fitBounds(circle.getBounds());
-			
 		}
 		if (searchByCoordinates === false) {
 			map.fitBounds(markers.getBounds());

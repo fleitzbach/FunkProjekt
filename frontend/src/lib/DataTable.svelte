@@ -54,7 +54,7 @@
 	onMount(() => {});
 </script>
 
-<div class="rounded-md flex flex-row min-h-0 overflow-clip">
+<div class="rounded-md flex flex-row h-full min-h-0 min-w-0 max-h-[calc(100%-1.5rem)] overflow-clip">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
