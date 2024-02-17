@@ -5,7 +5,7 @@
     export let value = 0;
     export let max = 100;
     export let min = 0;
-    export let unit: string;
+    export let unit: string = '';
 
     let internalSliderValue = [value];
 
@@ -37,6 +37,8 @@
     <Slider value={internalSliderValue} on:change={handleSliderChange} min={min} max={max}/>
     <div class='flex flex-row justify-start items-center gap-1'>
         <Input value={value.toString()} on:blur={handleInputChange} on:keypress={handleKeypress} class="w-14" />
-        <div class='text-sm'>{unit}</div>
+        {#if unit}
+            <div class='text-sm'>{unit}</div>
+        {/if}
     </div>
 </div>
