@@ -5,41 +5,41 @@ import { toast } from 'svelte-sonner';
 
 // Temperature Data
 function createDataStore() {
-    const { subscribe, set, update } = writable({
-        data: [],
-        loading: false,
-        error: null
-    });
+	const { subscribe, set, update } = writable({
+		data: [],
+		loading: false,
+		error: null
+	});
 
-    return {
-        subscribe,
-        fetchTemperatureData: async (id: string) => {
-            update(state => ({ ...state, loading: true, error: null }));
-            try {
-                const $dataSettings = get(dataSettings);
-                let dataUrl = `${API_URL}/data/${id}/${$dataSettings.interval}`;
-                
-                if ($dataSettings.start && $dataSettings.end) {
-                    dataUrl += `?start=${$dataSettings.start}&end=${$dataSettings.end}`;
-                }
-                
-                const response = await fetch(dataUrl);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-                
-                const data = await response.json();
-                set({ data: data, loading: false, error: null });
-            } catch (error) {
-                set({ data: [], loading: false, error: error.message });
-            }
-        }
-    };
+	return {
+		subscribe,
+		fetchTemperatureData: async (id: string) => {
+			update((state) => ({ ...state, loading: true, error: null }));
+			try {
+				const $dataSettings = get(dataSettings);
+				let dataUrl = `${API_URL}/data/${id}/${$dataSettings.interval}`;
+
+				if ($dataSettings.start && $dataSettings.end) {
+					dataUrl += `?start=${$dataSettings.start}&end=${$dataSettings.end}`;
+				}
+
+				const response = await fetch(dataUrl);
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch data');
+				}
+
+				const data = await response.json();
+				set({ data: data, loading: false, error: null });
+			} catch (error) {
+				set({ data: [], loading: false, error: error });
+				toast(error.message);
+			}
+		}
+	};
 }
 
 export const dataStore = createDataStore();
-
 
 function createDataSettingsStore() {
 	const { subscribe, set } = writable<DataSettings>({ interval: 'year' });
@@ -57,44 +57,61 @@ function createDataSettingsStore() {
 
 export const dataSettings = createDataSettingsStore();
 
-
 // Station List Data
 function createStationListStore() {
-	const { subscribe, set } = writable<Station[]>([]);
-      
+	const { subscribe, set, update } = writable({
+		data: [],
+		loading: false,
+		error: null
+	});
+
+	async function fetchAndUpdate(url) {
+		try {
+			const response = await fetch(url);
+
+			if (!response.ok) {
+				throw new Error('Failed to fetch data');
+			}
+
+			const data = await response.json();
+			set({ data: data, loading: false, error: null });
+		} catch (error) {
+			set({ data: [], loading: false, error: error });
+			toast(error.message);
+		}
+	}
+
 	return {
 		subscribe,
 		fetchStationsByCoords: async (lat, lng, radius, start?, end?) => {
+			update((state) => ({ ...state, loading: true, error: null }));
 			let url = `${API_URL}/stations`;
-      url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
+			url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
 			if (start) url += `&start=${start}`;
 			if (end) url += `&end=${end}`;
-      
-      const response = await fetch(url);
-			const newStationList = await response.json();
-			set(newStationList);
+
+			await fetchAndUpdate(url);
 		},
-    fetchStationsByName: async (name: string) => {
-      const response = await fetch(`${API_URL}/stations/${name}`);
-      const newStationList = await response.json();
-      set(newStationList);
-    }
+		fetchStationsByName: async (name: string) => {
+			update((state) => ({ ...state, loading: true, error: null }));
+			let url = `${API_URL}/stations/${name}`;
+
+			await fetchAndUpdate(url);
+		}
 	};
 }
 export const stationList = createStationListStore();
 
 // Current Station
 function createCurrentStationStore() {
-	const { subscribe, set } = writable<Station>(
-		{
-			id: '',
-			name: '',
-			latitude: 0,
-			longitude: 0,
-			first_year: 0,
-			last_year: 0,
-		}
-	);
+	const { subscribe, set } = writable<Station>({
+		id: '',
+		name: '',
+		latitude: 0,
+		longitude: 0,
+		first_year: 0,
+		last_year: 0
+	});
 
 	return {
 		subscribe,
@@ -109,7 +126,7 @@ function createCurrentStationStore() {
 				latitude: 0,
 				longitude: 0,
 				first_year: 0,
-				last_year: 0,
+				last_year: 0
 			});
 		}
 	};

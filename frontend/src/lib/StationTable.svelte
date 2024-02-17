@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
 	import {
 		addPagination,
 		addSortBy,
@@ -8,16 +7,19 @@
 		addHiddenColumns,
 		addSelectedRows
 	} from 'svelte-headless-table/plugins';
-	import { readable, writable } from 'svelte/store';
+	import { readable, writable, derived } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { currentStation, dataStore, stationList } from './store';
 	import { toast } from 'svelte-sonner';
+	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
+	import { currentStation, dataStore, stationList } from './store';
+	import LoadingOverlay from './loadingOverlay.svelte';
 
-	const table = createTable(stationList, {
-		// page: addPagination(),
+	const tableData = derived(stationList, ($stationList) => $stationList.data);
+
+	const table = createTable(tableData, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
 			fn: ({ filterValue, value }) => value.includes(filterValue)
@@ -25,7 +27,8 @@
 		hide: addHiddenColumns(),
 		select: addSelectedRows()
 	});
-	const columns = table.createColumns([
+
+	let columns = table.createColumns([
 		table.column({
 			accessor: 'id',
 			header: 'StationID',
@@ -110,10 +113,10 @@
 				return createRender(Button, {
 					variant: 'link',
 					size: 'sm',
-          class: 'p-0',
-				}).on('click', () => {
-					handleButtonClick(value);
-				}).slot('view Data');
+					class: 'p-0'
+				})
+					.on('click', () => handleButtonClick(value))
+					.slot(value.id);
 			},
 			plugins: {
 				sort: {
@@ -123,10 +126,9 @@
 		})
 	]);
 
-  function handleButtonClick(station) {
-    currentStation.setCurrentStation(station);
+	function handleButtonClick(station) {
+		currentStation.setCurrentStation(station);
 		dataStore.fetchTemperatureData(station.id);
-
 	}
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
@@ -172,12 +174,13 @@
 	</DropdownMenu.Root>
 </div>
 
-<div class="rounded-md flex flex-row max-h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
+<LoadingOverlay noData={$tableData.length == 0}></LoadingOverlay>
+<div class="relative rounded-md flex flex-row h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
 				<Subscribe rowAttrs={headerRow.attrs()}>
-					<Table.Row class='sticky top-0 bg-background'>
+					<Table.Row class="sticky top-0 bg-background">
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>

@@ -13,6 +13,8 @@
 	import { each } from 'chart.js/helpers';
 	import { X } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
+	import LoadingOverlay from './loadingOverlay.svelte';
+	import 'chartjs-adapter-luxon';
 
 	let chartElement;
 	let chart;
@@ -53,7 +55,6 @@
 					}
 				]
 			},
-
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
@@ -68,6 +69,12 @@
 						algorithm: 'lttb',
 						samples: 0.5
 					}
+				},
+				scales: {
+					x: {
+						type: 'time',
+						
+					},
 				},
 				onClick: function (event, chartElements) {
 					if (chartElements.length > 0) {
@@ -115,11 +122,8 @@
 							dataControls.interval = 'day';
 							updateData();
 						} else {
-							console.log(`Datum: ${dataPoint}`);
 						}
 
-						// Hier könnten Sie die Daten ausgeben, z.B. in der Konsole oder in einem UI-Element
-						console.log(`Datum: ${dataPoint}`);
 					}
 				}
 			}
@@ -173,7 +177,7 @@
 	}
 
 	function clearSettings() {
-		dataControls = { interval: 'year'};
+		dataControls = { interval: 'year' };
 		dataSettings.clearSettings();
 		toast('cleared settings');
 	}
@@ -186,9 +190,9 @@
 <div class="w-full flex flex-row bg-primary-foreground">
 	<!-- Data Controls -->
 	<div class="p-5 flex flex-col gap-5 items-baseline min-w-[300px] max-w-[300px] w-full">
-		<div class='flex flex-row justify-between w-full'>
+		<div class="flex flex-row justify-between w-full">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
-			<Button on:click={clearSettings} variant='link' class='p-0 font-normal'>clear</Button>
+			<Button on:click={clearSettings} variant="link" class="p-0 font-normal">clear</Button>
 		</div>
 		<div class="w-full">
 			<Label for="data-interval" class="font-semibold">Data interval</Label>
@@ -221,14 +225,11 @@
 	<div class="w-full min-w-0 p-5">
 		<div class="flex flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
-			<Button on:click={close} variant="ghost" class='aspect-square p-0'><X></X></Button>
+			<Button on:click={close} variant="ghost" class="aspect-square p-0"><X></X></Button>
 		</div>
-		<div class='relative h-full max-h-96 w-full'>
-			{#if $dataStore.loading}
-				<div class='absolute inset-0 flex justify-center items-center bg-background/50'>data loading...</div>
-			{:else if $dataStore.data.length === 0}
-				<div class='absolute inset-0 flex justify-center items-center bg-background/50'>no data.</div>
-			{/if}
+		<div class="relative h-full max-h-96 w-full">
+			<LoadingOverlay loading={$dataStore.loading} noData={$dataStore.data.length == 0}
+			></LoadingOverlay>
 			<canvas bind:this={chartElement}></canvas>
 		</div>
 	</div>

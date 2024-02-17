@@ -29,7 +29,6 @@
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
-	let points: Station[] = [];
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
@@ -90,7 +89,6 @@
 			selectionMarker.addTo(map);
 			toast(`Added coordinates (${lat}, ${lng}) to search-panel.`);
 		}
-
 	}
 
 	onMount(() => {
@@ -151,7 +149,7 @@
 			iconSize: [32, 32],
 			iconAnchor: [16, 32],
 			popupAnchor: [0, -16],
-			className: 'drop-shadow fill-red-500 cursor-default',
+			className: 'drop-shadow fill-red-500 cursor-default'
 		});
 
 		circle = L.circle([0, 0], {
@@ -166,16 +164,14 @@
 
 		const mapResizeObserver = new ResizeObserver((entries) => {
 			for (let entry of entries) {
-				const { width, height } = entry.contentRect;
 				map.invalidateSize();
 			}
 		});
 
-		mapResizeObserver.observe(document.querySelector('#map'));
+		mapResizeObserver.observe(document.querySelector('#map-container'));
 	});
 
 	async function search(e) {
-		let dataUrl = `${API_URL}/stations`;
 		dataLoading = true;
 		const lat = parseFloat(latitude);
 		const lng = parseFloat(longitude);
@@ -186,7 +182,9 @@
 				dataLoading = false;
 				return;
 			}
-			
+
+			coordinates = `${lat}, ${lng}`;
+
 			stationList.fetchStationsByCoords(
 				lat,
 				lng,
@@ -208,14 +206,14 @@
 	}
 
 	function updateMarkers(stations) {
+		stations = stations.data;
 		markers.clearLayers();
-		points = stations;
-		stations.forEach((point: Station) => {
-			const marker = L.marker([point.latitude, point.longitude], { icon: markerIcon });
+		stations.forEach((station: Station) => {
+			const marker = L.marker([station.latitude, station.longitude], { icon: markerIcon });
 			const popupContent = document.createElement('div');
 			new MarkerPopup({
 				target: popupContent,
-				props: { station: point }
+				props: { station: station }
 			});
 			marker.bindPopup(popupContent);
 			markers.addLayer(marker);
@@ -224,7 +222,7 @@
 			updateCircle(latitude, longitude, radius);
 			map.fitBounds(circle.getBounds());
 		}
-		if (searchName) {
+		if (searchByCoordinates === false) {
 			map.fitBounds(markers.getBounds());
 		}
 		dataLoading = false;
@@ -241,7 +239,9 @@
 	<Tabs.Root value="map" class="flex flex-col h-full w-full">
 		<div class="relative w-full h-full min-h-0 min-w-0 m-0 flex flex-row">
 			<!-- Search settings -->
-			<div class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full min-h-0 h-full overflow-auto">
+			<div
+				class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full min-h-0 h-full overflow-auto"
+			>
 				<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
 				<div>
 					<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
@@ -294,7 +294,7 @@
 				{/if}
 
 				<Button type="button" disabled={dataLoading} class="w-24" on:click={search}>
-					{#if dataLoading}
+					{#if $stationList.loading}
 						<svg
 							width="24"
 							height="24"
@@ -323,7 +323,7 @@
 			<Separator orientation="vertical"></Separator>
 
 			<!-- Map View -->
-			<Tabs.Content value="map" class="relative w-full h-full m-0 ">
+			<Tabs.Content value="map" id="map-container" class="relative w-full h-full m-0 ">
 				<div id="map" class="h-full w-full outline-none" use:mapAction></div>
 				<!-- Zoom Controls -->
 				<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
@@ -352,22 +352,17 @@
 				</div>
 			</Tabs.Content>
 			<!-- List View -->
-			<Tabs.Content value="list" class="w-full min-w-0 h-full m-0 p-5 box-border">
+			<Tabs.Content value="list" class="relative w-full min-w-0 h-full m-0 p-5 box-border">
 				<StationTable></StationTable>
-				{#if $stationList.length === 0}
-					<div class="flex flex-col items-center justify-center h-[calc(100%-6rem)]">
-						<p class="text-muted-foreground">No data.</p>
-					</div>
-				{/if}
 			</Tabs.Content>
 			<div class="absolute top-0 right-0 p-5 z-[1000]">
 				<Tabs.List>
-					<Tabs.Trigger value="map">Map</Tabs.Trigger>
+					<Tabs.Trigger value="map" on:click={map.invalidateSize()}>Map</Tabs.Trigger>
 					<Tabs.Trigger value="list">List</Tabs.Trigger>
 				</Tabs.List>
 			</div>
 		</div>
-		{#if $currentStation.id != ""}
+		{#if $currentStation.id != ''}
 			<Separator orientation="horizontal"></Separator>
 			<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->
 			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
