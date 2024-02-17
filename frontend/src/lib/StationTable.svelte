@@ -174,7 +174,7 @@
 	</DropdownMenu.Root>
 </div>
 
-<LoadingOverlay noData={$tableData.length == 0}></LoadingOverlay>
+<LoadingOverlay noData={$tableData.length == 0} backgroundOverlay={false}></LoadingOverlay>
 <div class="relative rounded-md flex flex-row h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>

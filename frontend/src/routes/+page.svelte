@@ -29,7 +29,7 @@
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
-	let maxStations;
+	let maxStations = 100;
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
@@ -306,10 +306,6 @@
 							<Label for="radius" class="font-semibold">Radius</Label>
 							<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
 						</div>
-						<div class="w-full">
-							<Label for="radius" class="font-semibold">Max Stations</Label>
-							<SliderWithInput bind:value={maxStations} min={1} max={150} unit={'pcs'}></SliderWithInput>
-						</div>
 						<div class="flex flex-row items-center gap-5">
 							<div>
 								<Label for="start" class="font-semibold">Start year</Label>
@@ -320,6 +316,10 @@
 								<Input type="text" id="end" bind:value={endYear} class="w-full" />
 							</div>
 						</div>
+					</div>
+					<div class="w-full">
+						<Label for="radius" class="font-semibold">Max Stations</Label>
+						<SliderWithInput bind:value={maxStations} min={1} max={500}></SliderWithInput>
 					</div>
 				{:else}
 					<div class="w-full overflow-clip">

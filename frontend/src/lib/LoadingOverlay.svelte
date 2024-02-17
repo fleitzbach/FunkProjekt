@@ -4,14 +4,16 @@
 
 	export let noData = false;
 	export let noDataMessage = 'no data available';
+
+    export let backgroundOverlay = true;
 </script>
 
 {#if loading}
-    <div class="absolute inset-0 flex justify-center items-center bg-primary-foreground/70">
+    <div class="absolute inset-0 flex justify-center items-center {backgroundOverlay ? 'bg-primary-foreground/70' : ''}">
         {loadingMessage}
     </div>
 {:else if noData}
-    <div class="absolute inset-0 flex justify-center items-center bg-primary-foreground/70">
+<div class="absolute inset-0 flex justify-center items-center {backgroundOverlay ? 'bg-primary-foreground/70' : ''}">
         {noDataMessage}
     </div>
 {/if}
