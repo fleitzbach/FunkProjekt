@@ -1,255 +1,66 @@
 <script lang="ts">
-    import {
-      createTable,
-      Render,
-      Subscribe,
-      createRender
-    } from "svelte-headless-table";
-    import {
-      addPagination,
-      addSortBy,
-      addTableFilter,
-      addHiddenColumns,
-      addSelectedRows
-    } from "svelte-headless-table/plugins";
-    import { readable } from "svelte/store";
-    import * as Table from "$lib/components/ui/table";
-    import { Button } from "$lib/components/ui/button";
-    import { ArrowUpDown, ChevronDown } from "lucide-svelte";
-    import { Input } from "$lib/components/ui/input";
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-    
-    type Payment = {
-      id: string;
-      name: string;
-      stationID: string;
-      latitude: number;
-      longitude: number;
-      first_year:number;
-      last_year: number;
-      distance: number;
-    };
-    const data: Payment[] = [
-      {
-        id: "GME00126514",
-        name: "NEUHAUSEN OB ECK-UNTERSCHWAND",
-        first_year: 1993,
-        last_year: 2003,
-        latitude: 47.9531,
-        longitude: 9.8842,
-        distance: 5.2328827734,
+	import Chart from 'chart.js/auto';
+	import { onMount } from 'svelte';
+	import { dataStore, currentStation, dataSettings } from './store';
+	import { Input } from './components/ui/input';
+	import { Button } from './components/ui/button';
+	import { API_URL } from '../config';
+	import * as Select from './components/ui/select';
+	import { Label } from './components/ui/label';
+	import { DateField } from './components/ui/date-field';
+	import { Root } from 'postcss';
+	import type { DataSettings } from './types';
+	import { each } from 'chart.js/helpers';
+	import * as Tooltip from "$lib/components/ui/tooltip";
+	import { X } from 'lucide-svelte';
+	import { LucideArrowUpRightSquare } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
+	import LoadingOverlay from './loadingOverlay.svelte';
+	import 'chartjs-adapter-luxon';
+	import * as Sheet from "$lib/components/ui/sheet";
+	import StationTable from '$lib/Datatable.svelte';
+onMount(() => {
+  // Init empty chart
+  chart = new Chart(chartElement, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'Maximum Temperature (°C)',
+          data: [],
+          tension: 0.2,
+          borderColor: '#ef4444'
+        },
+        {
+          label: 'Minimum Temperature (°C)',
+          data: [],
+          tension: 0.2,
+          borderColor: '#00f'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      plugins: {
+        decimation: {
+          enabled: true,
+          algorithm: 'lttb',
+          samples: 0.5
+        }
+      },
+      scales: {
+        x: {
+          type: 'time',
+          
+        },
       }
-    ];
-  
-    const table = createTable(readable(data), {
-      page: addPagination(),
-      sort: addSortBy({ disableMultiSort: true }),
-      filter: addTableFilter({
-        fn: ({ filterValue, value }) => value.includes(filterValue)
-      }),
-      hide: addHiddenColumns(),
-      select: addSelectedRows()
-    });
-    const columns = table.createColumns([
-      table.column({
-        accessor: "id",
-        header: "StationID",
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: "name",
-        header: "Name",
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: "first_year",
-        header: "First Year",
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: "last_year",
-        header: "Last Year",
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: "latitude",
-        header: "Latitude",
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: "longitude",
-        header: "Longitude",
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: "distance",
-        header: "Distance",
-        cell: ({ value }) => {
-          const formatted = new Intl.NumberFormat("en-US", {
-            style: "unit",
-            unit: "kilometer"
-          }).format(value);
-          return formatted;
-        },
-        plugins: {
-          filter: {
-            exclude: true
-          }
-        }
-      }),
-      table.column({
-        accessor: ({ id }) => id,
-        header: "",
-        cell: ({ value }) => {
-          return ''
-        },
-        plugins: {
-          sort: {
-            disable: true
-          }
-        }
-      }),
-    ]);
-    
-    const {
-      headerRows,
-      pageRows,
-      tableAttrs,
-      tableBodyAttrs,
-      pluginStates,
-      flatColumns,
-      rows
-    } = table.createViewModel(columns);
-    const { pageIndex, hasNextPage, hasPreviousPage } = pluginStates.page;
-    const { filterValue } = pluginStates.filter;
-    const { hiddenColumnIds } = pluginStates.hide;
-    const { selectedDataIds } = pluginStates.select;
-    const ids = flatColumns.map((col) => col.id);
-    let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-    $: $hiddenColumnIds = Object.entries(hideForId)
-      .filter(([, hide]) => !hide)
-      .map(([id]) => id);
-      const hidableCols = ["id", "name", "distance", "latitude", "longitude", "first_year", "last_year"];
-  </script>
-  
-  
-  <div>
-    <div class="flex items-center py-4">
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild let:builder>
-          <Button variant="outline" class="ml-auto" builders={[builder]}>
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          {#each flatColumns as col}
-            {#if hidableCols.includes(col.id)}
-              <DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
-                {col.header}
-              </DropdownMenu.CheckboxItem>
-            {/if}
-          {/each}
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
-    </div>
-  
-    <div class="rounded-md border">
-      <Table.Root {...$tableAttrs}>
-        <Table.Header>
-          {#each $headerRows as headerRow}
-            <Subscribe rowAttrs={headerRow.attrs()}>
-              <Table.Row>
-                {#each headerRow.cells as cell (cell.id)}
-                  <Subscribe
-                    attrs={cell.attrs()}
-                    let:attrs
-                    props={cell.props()}
-                    let:props
-                  >
-                    <Table.Head {...attrs}>
-                      {#if cell.id === "distance"}
-                        <Button variant="ghost" on:click={props.sort.toggle}>
-                          <Render of={cell.render()} />
-                          <ArrowUpDown class={"ml-2 h-4 w-4"} />
-                        </Button>
-                      {:else}
-                        <Render of={cell.render()} />
-                      {/if}
-                    </Table.Head>
-                  </Subscribe>
-                {/each}
-              </Table.Row>
-            </Subscribe>
-          {/each}
-        </Table.Header>
-        <Table.Body {...$tableBodyAttrs}>
-          {#each $pageRows as row (row.id)}
-            <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-              <Table.Row
-                {...rowAttrs}
-                data-state={$selectedDataIds[row.id] && "selected"}
-              >
-                {#each row.cells as cell (cell.id)}
-                  <Subscribe attrs={cell.attrs()} let:attrs>
-                    <Table.Cell {...attrs} class="[&:has([role=checkbox])]:pl-3">
-                      {#if cell.id === "station"}
-                        <div class="capitalize">
-                          <Render of={cell.render()} />
-                        </div>
-                      {:else if cell.id === "distance"}
-                        <div class="capitalize px-4">
-                          <Render of={cell.render()} />
-                        </div>
-                      {:else}
-                        <Render of={cell.render()} />
-                      {/if}
-                    </Table.Cell>
-                  </Subscribe>
-                {/each}
-              </Table.Row>
-            </Subscribe>
-          {/each}
-        </Table.Body>
-      </Table.Root>
-    </div>
-    <div class="flex items-center justify-end space-x-4 py-4">
-      <Button
-        variant="outline"
-        size="sm"
-        on:click={() => ($pageIndex = $pageIndex - 1)}
-        disabled={!$hasPreviousPage}>Previous</Button
-      >
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={!$hasNextPage}
-        on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
-      >
-    </div>
-  </div>
-
-
+    }
+  });
+</script>

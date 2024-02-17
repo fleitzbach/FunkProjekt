@@ -108,10 +108,14 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     df = calc_mean(df, rythm)
     #print("calc_mean --- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
-    df = df.pivot(index='date', columns='element', values='data_value').reset_index()
-    #print("pivot --- %s seconds ---" % (time.time() - start_time))
+    if rythm == 'season':
+        df = df.pivot(index='season', columns='element', values='data_value').reset_index()
+    else:
+        df['date'] = df['date'].astype(str)
+        df = df.pivot(index='date', columns='element', values='data_value').reset_index()
+    return df
 
     return df
 
 if __name__ == '__main__':
-    print(get_weather_data('USW00094728', '2020-01-01', '2021-12-31', 'season').to_json(orient="records"))
+    print(get_weather_data('USW00094728', '2020-01-01', '2021-12-31', 'year').to_json(orient="records"))
