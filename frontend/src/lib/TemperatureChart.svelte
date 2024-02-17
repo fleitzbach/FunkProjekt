@@ -224,6 +224,11 @@
 			<Button on:click={close} variant="ghost" class='aspect-square p-0'><X></X></Button>
 		</div>
 		<div class='relative h-full max-h-96 w-full'>
+			{#if $dataStore.loading}
+				<div class='absolute inset-0 flex justify-center items-center bg-background/50'>data loading...</div>
+			{:else if $dataStore.data.length === 0}
+				<div class='absolute inset-0 flex justify-center items-center bg-background/50'>no data.</div>
+			{/if}
 			<canvas bind:this={chartElement}></canvas>
 		</div>
 	</div>
