@@ -83,13 +83,13 @@ function createStationListStore() {
 
 	return {
 		subscribe,
-		fetchStationsByCoords: async (lat, lng, radius, start?, end?) => {
-			update((state) => ({ ...state, loading: true, error: null }));
+		fetchStationsByCoords: async (lat, lng, radius, start?, end?, maxStations?) => {
 			let url = `${API_URL}/stations`;
 			url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
 			if (start) url += `&start=${start}`;
 			if (end) url += `&end=${end}`;
 
+			if (maxStations) url += `&selection=${maxStations}`;
 			await fetchAndUpdate(url);
 		},
 		fetchStationsByName: async (name: string) => {

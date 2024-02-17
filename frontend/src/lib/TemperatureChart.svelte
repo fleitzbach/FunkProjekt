@@ -11,10 +11,14 @@
 	import { Root } from 'postcss';
 	import type { DataSettings } from './types';
 	import { each } from 'chart.js/helpers';
+	import * as Tooltip from "$lib/components/ui/tooltip";
 	import { X } from 'lucide-svelte';
+	import { LucideArrowUpRightSquare } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import LoadingOverlay from './loadingOverlay.svelte';
 	import 'chartjs-adapter-luxon';
+	import * as Sheet from "$lib/components/ui/sheet";
+	import StationTable from '$lib/Datatable.svelte';
 
 	let chartElement;
 	let chart;
@@ -123,7 +127,6 @@
 							updateData();
 						} else {
 						}
-
 					}
 				}
 			}
@@ -225,7 +228,30 @@
 	<div class="w-full min-w-0 p-5">
 		<div class="flex flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
-			<Button on:click={close} variant="ghost" class="aspect-square p-0"><X></X></Button>
+			<div class="flex items-center gap-x-5">
+			
+				<Sheet.Root>
+					<Tooltip.Root>
+						<Tooltip.Trigger >
+							<Sheet.Trigger>
+								<Button variant="ghost" class='aspect-square p-0'>
+									<LucideArrowUpRightSquare></LucideArrowUpRightSquare>
+								</Button>
+							</Sheet.Trigger>
+						</Tooltip.Trigger>
+						<Tooltip.Content class="z-[9999]">
+							Show data as list
+						</Tooltip.Content>
+					</Tooltip.Root>
+					<Sheet.Content class="z-[1000]">
+					<Sheet.Header>
+						<Sheet.Title>List Data</Sheet.Title>
+						<StationTable></StationTable>
+					</Sheet.Header>
+					</Sheet.Content>
+				</Sheet.Root>
+				<Button on:click={close} variant="ghost" class='aspect-square p-0'><X></X></Button>
+			</div>
 		</div>
 		<div class="relative h-full max-h-96 w-full">
 			<LoadingOverlay loading={$dataStore.loading} noData={$dataStore.data.length == 0}

@@ -29,6 +29,7 @@
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
+	let maxStations;
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
@@ -88,6 +89,26 @@
 			selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
 			selectionMarker.addTo(map);
 			toast(`Added coordinates (${lat}, ${lng}) to search-panel.`);
+		}
+	}
+
+	$: if (!searchByCoordinates) {
+		if (selectionMarker) {
+			selectionMarker.setOpacity(0);
+		}
+	} else if (searchByCoordinates) {
+		if (selectionMarker) {
+			selectionMarker.setOpacity(1);
+		}
+	}
+
+	$: if (!searchByCoordinates) {
+		if (selectionMarker) {
+			selectionMarker.setOpacity(0);
+		}
+	} else if (searchByCoordinates) {
+		if (selectionMarker) {
+			selectionMarker.setOpacity(1);
 		}
 	}
 
@@ -183,15 +204,24 @@
 				return;
 			}
 
-			coordinates = `${lat}, ${lng}`;
+			if (selectionMarker) {
+				map.removeLayer(selectionMarker);
+			}
 
+			// Add Marker to Search Coordinates
+			coordinates = `${lat}, ${lng}`;
+			selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
+			selectionMarker.addTo(map);
+			
 			stationList.fetchStationsByCoords(
 				lat,
 				lng,
 				radius,
 				startYear || undefined,
-				endYear || undefined
+				endYear || undefined,
+				maxStations || undefined
 			);
+
 		} else {
 			if (!searchName) {
 				toast('Please enter a station name.');
@@ -221,6 +251,7 @@
 		if (searchByCoordinates) {
 			updateCircle(latitude, longitude, radius);
 			map.fitBounds(circle.getBounds());
+			
 		}
 		if (searchByCoordinates === false) {
 			map.fitBounds(markers.getBounds());
@@ -274,6 +305,10 @@
 						<div class="w-full">
 							<Label for="radius" class="font-semibold">Radius</Label>
 							<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
+						</div>
+						<div class="w-full">
+							<Label for="radius" class="font-semibold">Max Stations</Label>
+							<SliderWithInput bind:value={maxStations} min={1} max={150} unit={'pcs'}></SliderWithInput>
 						</div>
 						<div class="flex flex-row items-center gap-5">
 							<div>
