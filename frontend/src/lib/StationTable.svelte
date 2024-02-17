@@ -14,7 +14,6 @@
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { currentStation, dataStore, stationList } from './store';
-	import { toast } from 'svelte-sonner';
 
 	const table = createTable(stationList, {
 		// page: addPagination(),
