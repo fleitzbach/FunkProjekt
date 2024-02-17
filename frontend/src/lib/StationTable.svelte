@@ -15,7 +15,7 @@
 	import { toast } from 'svelte-sonner';
 	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
 	import { currentStation, dataStore, stationList } from './store';
-	import LoadingOverlay from './loadingOverlay.svelte';
+	import LoadingOverlay from './LoadingOverlay.svelte';
 
 	const tableData = derived(stationList, ($stationList) => $stationList.data);
 
