@@ -183,7 +183,7 @@
 	}
 </script>
 
-<div class="w-full flex flex-row">
+<div class="w-full flex flex-row bg-primary-foreground">
 	<!-- Data Controls -->
 	<div class="p-5 flex flex-col gap-5 items-baseline min-w-[300px] max-w-[300px] w-full">
 		<div class='flex flex-row justify-between w-full'>
