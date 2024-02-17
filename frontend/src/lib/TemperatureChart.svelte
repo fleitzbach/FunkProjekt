@@ -56,6 +56,7 @@
 
 			options: {
 				responsive: true,
+				maintainAspectRatio: false,
 				animation: false,
 				interaction: {
 					mode: 'index',
@@ -65,7 +66,7 @@
 					decimation: {
 						enabled: true,
 						algorithm: 'lttb',
-						samples: 2
+						samples: 0.5
 					}
 				},
 				onClick: function (event, chartElements) {
@@ -126,7 +127,7 @@
 
 		// Setup subscription to the store
 		const unsubscribe = dataStore.subscribe((data) => {
-			updateChart(data);
+			updateChart(data.data);
 		});
 
 		// Cleanup on component destroy
@@ -217,11 +218,13 @@
 		<Button on:click={updateData}>Update Data</Button>
 	</div>
 	<!-- Visualisation -->
-	<div class="w-full p-5">
+	<div class="w-full min-w-0 p-5">
 		<div class="flex flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
 			<Button on:click={close} variant="ghost" class='aspect-square p-0'><X></X></Button>
 		</div>
-		<canvas bind:this={chartElement} class="h-full max-h-96 w-full"></canvas>
+		<div class='relative h-full max-h-96 w-full'>
+			<canvas bind:this={chartElement}></canvas>
+		</div>
 	</div>
 </div>

@@ -5,23 +5,39 @@ import { toast } from 'svelte-sonner';
 
 // Temperature Data
 function createDataStore() {
-	const { subscribe, set } = writable([]);
+    const { subscribe, set, update } = writable({
+        data: [],
+        loading: false,
+        error: null
+    });
 
-	return {
-		subscribe,
-		fetchTemperatureData: async (id: string) => {
-			const $dataSettings = get(dataSettings);
-      
-			let dataUrl = `${API_URL}/data/${id}/${$dataSettings.interval}`;
-			if ($dataSettings.start && $dataSettings.end) {
-				dataUrl += `?start=${$dataSettings.start}&end=${$dataSettings.end}`;
-			}
-			const response = await fetch(dataUrl);
-			const data = await response.json();
-			set(data);
-		}
-	};
+    return {
+        subscribe,
+        fetchTemperatureData: async (id: string) => {
+            update(state => ({ ...state, loading: true, error: null }));
+            try {
+                const $dataSettings = get(dataSettings);
+                let dataUrl = `${API_URL}/data/${id}/${$dataSettings.interval}`;
+                
+                if ($dataSettings.start && $dataSettings.end) {
+                    dataUrl += `?start=${$dataSettings.start}&end=${$dataSettings.end}`;
+                }
+                
+                const response = await fetch(dataUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                const data = await response.json();
+                set({ data: data, loading: false, error: null });
+            } catch (error) {
+                set({ data: [], loading: false, error: error.message });
+            }
+        }
+    };
 }
+
 export const dataStore = createDataStore();
 
 
