@@ -27,8 +27,6 @@
 		interval: $dataSettings.interval
 	};
 
-	$: dataControls.interval = $dataSettings.interval;
-
 	let intervals = [
 		{ value: 'year', label: 'Year', disabled: false },
 		{ value: 'season', label: 'Season', disabled: true },
@@ -36,7 +34,9 @@
 		{ value: 'day', label: 'Day', disabled: false }
 	];
 
-	let selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
+	let seletedInterval
+
+	$: selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
 
 	onMount(() => {
 		// Init empty chart
@@ -62,7 +62,7 @@
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
-				animation: false,
+				animation: true,
 				interaction: {
 					mode: 'index',
 					intersect: false

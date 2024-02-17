@@ -143,12 +143,12 @@
 			iconCreateFunction: function (cluster) {
 				return L.divIcon({
 					html: `
-            <div class="flex justify-center items-center w-full h-full">
-              <h4 class="scroll-m-20 text-md font-semibold tracking-tight">
-              ${cluster.getChildCount()}
-              </h4>
-            </div>
-            `,
+						<div class="flex justify-center items-center w-full h-full">
+							<h4 class="scroll-m-20 text-md font-semibold tracking-tight">
+							${cluster.getChildCount()}
+							</h4>
+						</div>
+						`,
 					iconSize: [32, 32],
 					className: 'bg-background text-primary rounded-full shadow'
 				});
@@ -161,7 +161,7 @@
 			iconSize: [32, 32],
 			iconAnchor: [16, 32],
 			popupAnchor: [0, -16],
-			className: 'drop-shadow fill-primary'
+			className: 'drop-shadow fill-accent dark:fill-primary'
 		});
 
 		selectionMarkerIcon = new L.divIcon({
@@ -173,8 +173,8 @@
 		});
 
 		circle = L.circle([0, 0], {
-			color: '#ef4444',
-			fillColor: '#ef4444',
+			color: '#105082',
+			fillColor: '#105082',
 			fillOpacity: 0.1,
 			radius: 0,
 			interactive: false
@@ -394,7 +394,7 @@
 			</Tabs.Content>
 			<div class="absolute top-0 right-0 p-5 z-[1000]">
 				<Tabs.List>
-					<Tabs.Trigger value="map" on:click={map.invalidateSize()}>Map</Tabs.Trigger>
+					<Tabs.Trigger value="map">Map</Tabs.Trigger>
 					<Tabs.Trigger value="list">List</Tabs.Trigger>
 				</Tabs.List>
 			</div>
