@@ -64,11 +64,12 @@ function createStationListStore() {
       
 	return {
 		subscribe,
-		fetchStationsByCoords: async (lat, lng, radius, start?, end?) => {
+		fetchStationsByCoords: async (lat, lng, radius, start?, end?, maxStations?) => {
 			let url = `${API_URL}/stations`;
       url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
 			if (start) url += `&start=${start}`;
 			if (end) url += `&end=${end}`;
+			if (maxStations) url += `&selection=${maxStations}`;
       
       const response = await fetch(url);
 			const newStationList = await response.json();

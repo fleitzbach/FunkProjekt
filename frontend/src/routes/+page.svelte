@@ -29,6 +29,7 @@
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius = 50;
+	let maxStations;
 	let points: Station[] = [];
 	let markers;
 	const initialView = [[48, 9], 6];
@@ -211,7 +212,8 @@
 				lng,
 				radius,
 				startYear || undefined,
-				endYear || undefined
+				endYear || undefined,
+				maxStations || undefined
 			);
 
 		} else {
@@ -295,6 +297,10 @@
 						<div class="w-full">
 							<Label for="radius" class="font-semibold">Radius</Label>
 							<SliderWithInput bind:value={radius} min={10} max={100} unit={'km'}></SliderWithInput>
+						</div>
+						<div class="w-full">
+							<Label for="radius" class="font-semibold">Max Stations</Label>
+							<SliderWithInput bind:value={maxStations} min={1} max={150} unit={'pcs'}></SliderWithInput>
 						</div>
 						<div class="flex flex-row items-center gap-5">
 							<div>
