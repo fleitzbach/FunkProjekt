@@ -88,8 +88,8 @@ function createStationListStore() {
 			url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
 			if (start) url += `&start=${start}`;
 			if (end) url += `&end=${end}`;
-
 			if (maxStations) url += `&selection=${maxStations}`;
+			
 			await fetchAndUpdate(url);
 		},
 		fetchStationsByName: async (name: string) => {
