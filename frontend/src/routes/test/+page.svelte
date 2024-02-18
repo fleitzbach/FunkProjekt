@@ -7,6 +7,7 @@
 
   let weatherData = [
       { "season": "autumn2021", "TMAX": 11.1589197713, "TMIN": 5.0074117879 },
+      { "season": "autumn2021"},
       { "season": "spring2021", "TMAX": 17.7811594203, "TMIN": 7.7956331045 },
       { "season": "summer2021", "TMAX": 23.3749346771, "TMIN": 13.289193729 },
       { "season": "winter2021", "TMAX": 6.3487922705, "TMIN": 0.500173913 },
@@ -61,7 +62,7 @@
           }
           return `${season} ${year}`;
       });
-
+      console.log(labels)
       chart.data.labels = labels;
       chart.data.datasets[0].data = data.map(d => d.TMAX);
       chart.data.datasets[1].data = data.map(d => d.TMIN);

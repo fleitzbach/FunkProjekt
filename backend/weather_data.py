@@ -52,13 +52,13 @@ def get_season(date):
                'summer': pd.date_range(start='21/06/'+year, end='22/09/'+year),
                'autumn': pd.date_range(start='23/09/'+year, end='20/12/'+year)}
     if date in seasons['spring']:
-        return 'spring'
+        return year + '2spring' 
     if date in seasons['summer']:
-        return 'summer'
+        return year + '3summer' 
     if date in seasons['autumn']:
-        return 'autumn'
+        return year + '4autumn' 
     else:
-        return 'winter'
+        return year + '1winter' 
 
 def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     """calculates the mean of the data from a given df
@@ -80,7 +80,7 @@ def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     elif rythm == 'season':
         df['season'] = df['date'].apply(get_season)
         df['year'] = df['date'].dt.year  # Füge das Jahr als separate Spalte hinzu
-        df = df.groupby(['year', 'season', 'element'])['data_value'].mean().reset_index()
+        df = df.groupby(['season', 'element'])['data_value'].mean().reset_index()
 
     else:
         return 'Rythm not found'
@@ -113,7 +113,7 @@ def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
     if rythm == 'season':
 
         # Pivotiere die Daten für die finale Ausgabe
-        df = df.pivot_table(index=['year', 'season'], columns='element', values='data_value').reset_index()
+        df = df.pivot_table(index='season', columns='element', values='data_value').reset_index()
     else:
         df['date'] = df['date'].astype(str)
         df = df.pivot(index='date', columns='element', values='data_value').reset_index()
