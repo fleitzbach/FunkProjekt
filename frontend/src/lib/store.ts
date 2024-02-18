@@ -18,7 +18,6 @@ function createDataStore() {
 			try {
 				const $dataSettings = get(dataSettings);
 				let dataUrl = `${API_URL}/data/${id}/${$dataSettings.interval}`;
-				
 
 				if ($dataSettings.start && $dataSettings.end) {
 					dataUrl += `?start=${$dataSettings.start}&end=${$dataSettings.end}`;
@@ -34,7 +33,7 @@ function createDataStore() {
 				set({ data: data, loading: false, error: null });
 			} catch (error) {
 				set({ data: [], loading: false, error: error });
-				toast.error(error.message);
+				toast.error("Error while fetching temperature data:", {description: error.message});
 			}
 		}
 	};
@@ -61,13 +60,15 @@ export const dataSettings = createDataSettingsStore();
 // Station List Data
 function createStationListStore() {
 	const { subscribe, set, update } = writable({
-		data: [],
+		data: <Station[]> [],
 		loading: false,
 		error: null
 	});
 
 	async function fetchAndUpdate(url) {
 		try {
+			console.log('Fetching station data')
+			update(({ data }) => ({ data, loading: true, error: null }));
 			const response = await fetch(url);
 
 			if (!response.ok) {
@@ -75,29 +76,31 @@ function createStationListStore() {
 			}
 
 			const data = await response.json();
-			
-			toast('Found ' + data.length + ' stations')
+
+			if (data.length === 0) {
+				toast.warning('No stations found');
+			} else {
+				toast('Found ' + data.length + ' stations');
+			}
 			set({ data: data, loading: false, error: null });
 		} catch (error) {
 			set({ data: [], loading: false, error: error });
-			toast.error(error.message);
+			toast.error("Error while fetching station data:", {description: error.message});
 		}
 	}
 
 	return {
 		subscribe,
 		fetchStationsByCoords: async (lat, lng, radius, start?, end?, maxStations?) => {
-			update((state) => ({ ...state, loading: true, error: null }));
 			let url = `${API_URL}/stations`;
 			url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
 			if (start) url += `&start=${start}`;
 			if (end) url += `&end=${end}`;
 			if (maxStations) url += `&selection=${maxStations}`;
-			
+
 			await fetchAndUpdate(url);
 		},
 		fetchStationsByName: async (name: string) => {
-			update((state) => ({ ...state, loading: true, error: null }));
 			let url = `${API_URL}/stations/${name}`;
 
 			await fetchAndUpdate(url);

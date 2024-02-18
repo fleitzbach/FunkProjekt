@@ -17,7 +17,7 @@
 	import { mode, ModeWatcher } from 'mode-watcher';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import TemperatureChart from '$lib/TemperatureChart.svelte';
-	import {  stationList, currentStation } from '$lib/store';
+	import { stationList, currentStation } from '$lib/store';
 	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import StationTable from '$lib/StationTable.svelte';
@@ -32,8 +32,8 @@
 	let markers;
 	const initialView = [[48, 9], 6];
 	let markerIcon;
-	let darkMap;
-	let lightMap;
+	let _darkMap;
+	let _lightMap;
 	let startYear;
 	let endYear;
 	let searchByCoordinates = true;
@@ -43,13 +43,13 @@
 	let selectionMarkerIcon;
 
 	function handleThemeChange(mode) {
-		if (lightMap && darkMap) {
+		if (_lightMap && _darkMap) {
 			if (mode === 'dark') {
-				darkMap.addTo(map);
-				lightMap.remove();
+				_darkMap.addTo(map);
+				_lightMap.remove();
 			} else {
-				lightMap.addTo(map);
-				darkMap.remove();
+				_lightMap.addTo(map);
+				_darkMap.remove();
 			}
 		}
 	}
@@ -65,12 +65,106 @@
 		return m;
 	}
 
-	function mapAction(container) {
+	function mapAction(container) {		
 		map = createMap(container);
+
+		map.on('click', onMapClick);
+
+		_darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
+          &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
+			subdomains: 'abcd'
+		});
+
+		_lightMap = L.tileLayer(
+			'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+			{
+				attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
+          &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
+				subdomains: 'abcd'
+			}
+		);
+
+		handleThemeChange($mode);
+
+		L.DomUtil.addClass(map._container, 'cursor-default');
+		L.DomUtil.removeClass(map._container, 'leaflet-grab');
+
+		markerIcon = new L.divIcon({
+			html: `<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11.291 21.706 12 21l-.709.706zM12 21l.708.706a1 1 0 0 1-1.417 0l-.006-.007-.017-.017-.062-.063a47.708 47.708 0 0 1-1.04-1.106 49.562 49.562 0 0 1-2.456-2.908c-.892-1.15-1.804-2.45-2.497-3.734C4.535 12.612 4 11.248 4 10c0-4.539 3.592-8 8-8 4.408 0 8 3.461 8 8 0 1.248-.535 2.612-1.213 3.87-.693 1.286-1.604 2.585-2.497 3.735a49.583 49.583 0 0 1-3.496 4.014l-.062.063-.017.017-.006.006L12 21zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/></svg>`,
+			iconSize: [32, 32],
+			iconAnchor: [16, 32],
+			popupAnchor: [0, -16],
+			className: 'drop-shadow fill-primary'
+		});
+
+		selectionMarkerIcon = new L.divIcon({
+			html: `<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11.291 21.706 12 21l-.709.706zM12 21l.708.706a1 1 0 0 1-1.417 0l-.006-.007-.017-.017-.062-.063a47.708 47.708 0 0 1-1.04-1.106 49.562 49.562 0 0 1-2.456-2.908c-.892-1.15-1.804-2.45-2.497-3.734C4.535 12.612 4 11.248 4 10c0-4.539 3.592-8 8-8 4.408 0 8 3.461 8 8 0 1.248-.535 2.612-1.213 3.87-.693 1.286-1.604 2.585-2.497 3.735a49.583 49.583 0 0 1-3.496 4.014l-.062.063-.017.017-.006.006L12 21zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/></svg>`,
+			iconSize: [32, 32],
+			iconAnchor: [16, 32],
+			popupAnchor: [0, -16],
+			className: 'drop-shadow fill-red-500 cursor-default'
+		});
+
+		circle = L.circle([0, 0], {
+			color: '#105082',
+			fillColor: '#105082',
+			fillOpacity: 0.1,
+			radius: 0,
+			interactive: false
+		});
+
+		markers = L.markerClusterGroup({
+			spiderfyOnMaxZoom: false,
+			showCoverageOnHover: false,
+			zoomToBoundsOnClick: true,
+			maxClusterRadius: 40,
+			disableClusteringAtZoom: map.getMaxZoom(),
+			iconCreateFunction: function (cluster) {
+				return L.divIcon({
+					html: `
+						<div class="flex justify-center items-center w-full h-full">
+							<h4 class="scroll-m-20 text-md font-semibold tracking-tight">
+							${cluster.getChildCount()}
+							</h4>
+						</div>
+						`,
+					iconSize: [32, 32],
+					className: 'bg-background text-primary rounded-full shadow'
+				});
+			}
+		});
+		map.addLayer(markers);
+
+		const mapResizeObserver = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				if (map) map.invalidateSize();
+			}
+		});
+
+		mapResizeObserver.observe(document.querySelector('#map-container'));
+
+		const unsubscribe = stationList.subscribe((data) => {
+			if (!latitude || !longitude) {
+				return;
+			}
+			if (data.data.length === 0) {
+				return;
+			}
+			if (!map) {
+				return;
+			}
+
+			updateMarkers(data);
+		});
 
 		return {
 			destroy: () => {
+				unsubscribe();
+				markers.remove();
+				circle.remove();
 				map.remove();
+				mapResizeObserver.disconnect();
 				map = null;
 			}
 		};
@@ -110,87 +204,7 @@
 	}
 
 	onMount(() => {
-		map.on('click', onMapClick);
-
-		darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
-          &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
-			subdomains: 'abcd'
-		});
-
-		lightMap = L.tileLayer(
-			'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-			{
-				attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
-          &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
-				subdomains: 'abcd'
-			}
-		);
-
-		handleThemeChange($mode);
-
-		L.DomUtil.addClass(map._container, 'cursor-default');
-		L.DomUtil.removeClass(map._container, 'leaflet-grab');
-
-		markers = L.markerClusterGroup({
-			spiderfyOnMaxZoom: false,
-			showCoverageOnHover: false,
-			zoomToBoundsOnClick: true,
-			maxClusterRadius: 40,
-			disableClusteringAtZoom: map.getMaxZoom(),
-			iconCreateFunction: function (cluster) {
-				return L.divIcon({
-					html: `
-						<div class="flex justify-center items-center w-full h-full">
-							<h4 class="scroll-m-20 text-md font-semibold tracking-tight">
-							${cluster.getChildCount()}
-							</h4>
-						</div>
-						`,
-					iconSize: [32, 32],
-					className: 'bg-background text-primary rounded-full shadow'
-				});
-			}
-		});
-		map.addLayer(markers);
-
-		markerIcon = new L.divIcon({
-			html: `<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11.291 21.706 12 21l-.709.706zM12 21l.708.706a1 1 0 0 1-1.417 0l-.006-.007-.017-.017-.062-.063a47.708 47.708 0 0 1-1.04-1.106 49.562 49.562 0 0 1-2.456-2.908c-.892-1.15-1.804-2.45-2.497-3.734C4.535 12.612 4 11.248 4 10c0-4.539 3.592-8 8-8 4.408 0 8 3.461 8 8 0 1.248-.535 2.612-1.213 3.87-.693 1.286-1.604 2.585-2.497 3.735a49.583 49.583 0 0 1-3.496 4.014l-.062.063-.017.017-.006.006L12 21zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/></svg>`,
-			iconSize: [32, 32],
-			iconAnchor: [16, 32],
-			popupAnchor: [0, -16],
-			className: 'drop-shadow fill-primary'
-		});
-
-		selectionMarkerIcon = new L.divIcon({
-			html: `<svg width="32px" height="32px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11.291 21.706 12 21l-.709.706zM12 21l.708.706a1 1 0 0 1-1.417 0l-.006-.007-.017-.017-.062-.063a47.708 47.708 0 0 1-1.04-1.106 49.562 49.562 0 0 1-2.456-2.908c-.892-1.15-1.804-2.45-2.497-3.734C4.535 12.612 4 11.248 4 10c0-4.539 3.592-8 8-8 4.408 0 8 3.461 8 8 0 1.248-.535 2.612-1.213 3.87-.693 1.286-1.604 2.585-2.497 3.735a49.583 49.583 0 0 1-3.496 4.014l-.062.063-.017.017-.006.006L12 21zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/></svg>`,
-			iconSize: [32, 32],
-			iconAnchor: [16, 32],
-			popupAnchor: [0, -16],
-			className: 'drop-shadow fill-red-500 cursor-default'
-		});
-
-		circle = L.circle([0, 0], {
-			color: '#105082',
-			fillColor: '#105082',
-			fillOpacity: 0.1,
-			radius: 0,
-			interactive: false
-		});
-
-		stationList.subscribe((data) => {
-			if (latitude && longitude) {
-				updateMarkers(data)
-			}
-		});
-
-		const mapResizeObserver = new ResizeObserver((entries) => {
-			for (let entry of entries) {
-				map.invalidateSize();
-			}
-		});
-
-		mapResizeObserver.observe(document.querySelector('#map-container'));
+		
 	});
 
 	async function search(e) {
@@ -211,7 +225,7 @@
 			coordinates = `${lat}, ${lng}`;
 			selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
 			selectionMarker.addTo(map);
-			
+
 			stationList.fetchStationsByCoords(
 				lat,
 				lng,
@@ -220,7 +234,6 @@
 				endYear || undefined,
 				maxStations || undefined
 			);
-
 		} else {
 			if (!searchName) {
 				toast.warning('Please enter a station name.');
@@ -402,7 +415,7 @@
 		{/if}
 	</Tabs.Root>
 
-	<Toaster richColors={true}/>
+	<Toaster richColors={true} />
 </main>
 <ModeWatcher />
 

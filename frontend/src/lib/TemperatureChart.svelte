@@ -188,7 +188,6 @@
 	};
 
 	function updateChart(data) {
-		console.log(data);
 		if (chart && data) {
 			if (dataControls.interval == 'season') {
 				data = fillMissingData(data);
