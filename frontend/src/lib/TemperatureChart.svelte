@@ -19,6 +19,7 @@
 	import 'chartjs-adapter-luxon';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import Datatable from './DataTable.svelte';
+	import Datatableseason from './DataTableSeason.svelte';
 
 	let chartElement;
 	let chart;
@@ -318,7 +319,11 @@
 						<Sheet.Header>
 							<Sheet.Title>List Data</Sheet.Title>
 						</Sheet.Header>
-						<Datatable></Datatable>
+						{#if $dataSettings.interval === "season"}
+							<Datatableseason></Datatableseason>
+						{:else}
+							<Datatable></Datatable>
+						{/if}
 					</Sheet.Content>
 				</Sheet.Root>
 				<Button on:click={close} variant="ghost" class="aspect-square p-0"><X></X></Button>
