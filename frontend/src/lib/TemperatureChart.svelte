@@ -149,7 +149,7 @@
 
 		for (let year = startYear; year <= endYear; year++) {
 			seasons.forEach((season, index) => {
-			allSeasons.push(${year}${index + 1}${season});
+			allSeasons.push(`${year}${index + 1}${season}`);
 			});
 		}
 
