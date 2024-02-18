@@ -11,10 +11,10 @@
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
-	import { dataStore, stationList} from './store';
+	import { dataStore, stationList } from './store';
+	import LoadingOverlay from './LoadingOverlay.svelte';
 
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
-
 
 	const table = createTable(tableData, {
 		sort: addSortBy({ disableMultiSort: true }),
@@ -41,7 +41,7 @@
 			cell: ({ value }) => {
 				return value == null ? '–' : value;
 			}
-		}),
+		})
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
@@ -52,12 +52,14 @@
 	onMount(() => {});
 </script>
 
-<div class="rounded-md flex flex-row h-full min-h-0 min-w-0 max-h-[calc(100%-1.5rem)] overflow-clip">
+<div
+	class="rounded-md flex flex-row h-full min-h-0 min-w-0 max-h-[calc(100%-1.5rem)] overflow-clip"
+>
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
 				<Subscribe rowAttrs={headerRow.attrs()}>
-					<Table.Row class='sticky top-0 bg-background'>
+					<Table.Row class="sticky top-0 bg-background">
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>

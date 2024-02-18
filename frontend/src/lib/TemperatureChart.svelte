@@ -37,6 +37,28 @@
 
 	$: selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
 
+	const xScale = {
+		year: {
+			type: 'time',
+			time: {
+				unit: 'year'
+			}
+		},
+		month: {
+			type: 'time',
+			time: {
+				unit: 'month'
+			}
+		},
+		day: {
+			type: 'time',
+			time: {
+				unit: 'day'
+			}
+		},
+		season: {}
+	};
+
 	onMount(() => {
 		chart = new Chart(chartElement, {
 			type: 'line',
@@ -72,76 +94,75 @@
 					}
 				},
 				scales: {
-					x: {
-						type: 'time'
-					}
+					x: xScale[dataControls.interval]
 				},
 				onClick: function (event, chartElements) {
-					if (chartElements.length > 0) {
-						const elementIndex = chartElements[0].index;
-						const dataPoint = this.data.labels[elementIndex];
-						if (dataControls.interval == 'year') {
-							dataControls.start = `01.01.${dataPoint}`;
-							dataControls.end = `30.12.${dataPoint}`;
-							dataControls.interval = 'month';
-							updateData();
-						} else if (dataControls.interval == 'month') {
-							let datapoint_split = dataPoint.split('-');
-							let datapoint_year = datapoint_split[0];
-							let datapoint_month = datapoint_split[1];
-							let isLeapYear =
-								(datapoint_year % 4 === 0 && datapoint_year % 100 !== 0) ||
-								datapoint_year % 400 === 0;
-							let datapoint_endDay;
-							if (
-								datapoint_month === '01' ||
-								datapoint_month === '03' ||
-								datapoint_month === '05' ||
-								datapoint_month === '07' ||
-								datapoint_month === '08' ||
-								datapoint_month === '10' ||
-								datapoint_month === '12'
-							) {
-								datapoint_endDay = 31;
-							} else if (
-								datapoint_month === '04' ||
-								datapoint_month === '06' ||
-								datapoint_month === '09' ||
-								datapoint_month === '11'
-							) {
-								datapoint_endDay = 30;
-							} else if (datapoint_month === '02') {
-								datapoint_endDay = isLeapYear ? 29 : 28;
-							} else {
-								console.error('Invalid month:', datapoint_month);
-								return;
-							}
-							dataControls.start = `01.${datapoint_month}.${datapoint_year}`;
-							dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
-							dataControls.interval = 'day';
-							updateData();
-						} else if (dataControls.interval == 'season') {
-							console.log(dataPoint);
-							let datapoint_split = dataPoint.split(' ');
-							let datapoint_year = datapoint_split[1];
-
-							if (datapoint_split[0] == 'Winter') {
-								dataControls.start = `21.12.${datapoint_year}`;
-								dataControls.end = `20.03.${datapoint_year}`;
-							} else if (datapoint_split[0] == 'Spring') {
-								dataControls.start = `21.03.${datapoint_year}`;
-								dataControls.end = `20.06.${datapoint_year}`;
-							} else if (datapoint_split[0] == 'Summer') {
-								dataControls.start = `21.06.${datapoint_year}`;
-								dataControls.end = `22.09.${datapoint_year}`;
-							} else if (datapoint_split[0] == 'Autumn') {
-								dataControls.start = `23.09.${datapoint_year}`;
-								dataControls.end = `20.12.${datapoint_year}`;
-							}
-							console.log(datapoint_split[0]);
-							dataControls.interval = 'day';
-							updateData();
+					if (chartElements.length === 0) {
+						return;
+					}
+					const elementIndex = chartElements[0].index;
+					const dataPoint = this.data.labels[elementIndex];
+					if (dataControls.interval == 'year') {
+						dataControls.start = `01.01.${dataPoint}`;
+						dataControls.end = `30.12.${dataPoint}`;
+						dataControls.interval = 'month';
+						updateData();
+					} else if (dataControls.interval == 'month') {
+						let datapoint_split = dataPoint.split('-');
+						let datapoint_year = datapoint_split[0];
+						let datapoint_month = datapoint_split[1];
+						let isLeapYear =
+							(datapoint_year % 4 === 0 && datapoint_year % 100 !== 0) ||
+							datapoint_year % 400 === 0;
+						let datapoint_endDay;
+						if (
+							datapoint_month === '01' ||
+							datapoint_month === '03' ||
+							datapoint_month === '05' ||
+							datapoint_month === '07' ||
+							datapoint_month === '08' ||
+							datapoint_month === '10' ||
+							datapoint_month === '12'
+						) {
+							datapoint_endDay = 31;
+						} else if (
+							datapoint_month === '04' ||
+							datapoint_month === '06' ||
+							datapoint_month === '09' ||
+							datapoint_month === '11'
+						) {
+							datapoint_endDay = 30;
+						} else if (datapoint_month === '02') {
+							datapoint_endDay = isLeapYear ? 29 : 28;
+						} else {
+							console.error('Invalid month:', datapoint_month);
+							return;
 						}
+						dataControls.start = `01.${datapoint_month}.${datapoint_year}`;
+						dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
+						dataControls.interval = 'day';
+						updateData();
+					} else if (dataControls.interval == 'season') {
+						console.log(dataPoint);
+						let datapoint_split = dataPoint.split(' ');
+						let datapoint_year = datapoint_split[1];
+
+						if (datapoint_split[0] == 'Winter') {
+							dataControls.start = `21.12.${datapoint_year}`;
+							dataControls.end = `20.03.${datapoint_year}`;
+						} else if (datapoint_split[0] == 'Spring') {
+							dataControls.start = `21.03.${datapoint_year}`;
+							dataControls.end = `20.06.${datapoint_year}`;
+						} else if (datapoint_split[0] == 'Summer') {
+							dataControls.start = `21.06.${datapoint_year}`;
+							dataControls.end = `22.09.${datapoint_year}`;
+						} else if (datapoint_split[0] == 'Autumn') {
+							dataControls.start = `23.09.${datapoint_year}`;
+							dataControls.end = `20.12.${datapoint_year}`;
+						}
+						console.log(datapoint_split[0]);
+						dataControls.interval = 'day';
+						updateData();
 					}
 				}
 			}
@@ -149,9 +170,10 @@
 
 		// Setup subscription to the store
 		const unsubscribe = dataStore.subscribe((data) => {
-			if (!data.loading) {
-				updateChart(data.data);
+			if (data.loading) {
+				return;
 			}
+			updateChart(data.data);
 		});
 
 		// Cleanup on component destroy
@@ -188,6 +210,7 @@
 
 	function updateChart(data) {
 		if (chart && data) {
+			chart.options.scales.x = xScale[dataControls.interval];
 			if (dataControls.interval == 'season') {
 				data = fillMissingData(data);
 				let labels = data.map((d) => {
@@ -208,13 +231,11 @@
 				chart.data.labels = labels;
 				chart.data.datasets[0].data = data.map((row) => row.TMAX);
 				chart.data.datasets[1].data = data.map((row) => row.TMIN);
-				chart.options.scales.x = {};
 				chart.update();
 			} else {
 				chart.data.labels = data.map((row) => row.date);
 				chart.data.datasets[0].data = data.map((row) => row.TMAX);
 				chart.data.datasets[1].data = data.map((row) => row.TMIN);
-				chart.options.scales.x = { type: 'time' };
 				chart.update();
 			}
 		}
@@ -287,7 +308,32 @@
 				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" />
 			</div>
 		</div>
-		<Button on:click={updateData}>Update Data</Button>
+		<Button on:click={updateData} disabled={$dataStore.loading} class="w-28" >
+			{#if $dataStore.loading}
+				<svg
+					width="24"
+					height="24"
+					class="fill-primary-foreground"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+					><path
+						d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+						opacity=".25"
+					/><path
+						d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+						><animateTransform
+							attributeName="transform"
+							type="rotate"
+							dur="0.75s"
+							values="0 12 12;360 12 12"
+							repeatCount="indefinite"
+						/></path
+					></svg
+				>
+			{:else}
+				Update Data
+			{/if}</Button
+		>
 	</div>
 	<!-- Visualisation -->
 	<div class="w-full min-w-0 p-5">
@@ -309,7 +355,8 @@
 						<Sheet.Header>
 							<Sheet.Title>List Data</Sheet.Title>
 						</Sheet.Header>
-						<LoadingOverlay noData={$dataStore.data.length === 0} backgroundOverlay={false}></LoadingOverlay>
+						<LoadingOverlay noData={$dataStore.data.length === 0} backgroundOverlay={false}
+						></LoadingOverlay>
 
 						{#if $dataSettings.interval === 'season'}
 							<Datatableseason></Datatableseason>
