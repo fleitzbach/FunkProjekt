@@ -23,7 +23,6 @@
 	let chartElement;
 	let chart;
 
-
 	let dataControls: DataSettings = {
 		interval: $dataSettings.interval
 	};
@@ -113,7 +112,6 @@
 							} else if (datapoint_month === '02') {
 								datapoint_endDay = isLeapYear ? 29 : 28;
 							} else {
-								// Handle invalid month
 								console.error('Invalid month:', datapoint_month);
 								return;
 							}
@@ -121,13 +119,33 @@
 							dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
 							dataControls.interval = 'day';
 							updateData();
-						} else {
+
+						} else if (dataControls.interval == 'season') {
+							console.log(dataPoint);
+							let datapoint_split = dataPoint.split(' ');
+							let datapoint_year = datapoint_split[1];
+
+							if (datapoint_split[0] == 'Winter') {
+								dataControls.start = `21.12.${datapoint_year}`;
+								dataControls.end = `20.03.${datapoint_year}`;
+							} else if (datapoint_split[0] == 'Spring') {
+								dataControls.start = `21.03.${datapoint_year}`;
+								dataControls.end = `20.06.${datapoint_year}`;
+							} else if (datapoint_split[0] == 'Summer') {
+								dataControls.start = `21.06.${datapoint_year}`;
+								dataControls.end = `22.09.${datapoint_year}`;
+							} else if (datapoint_split[0] == 'Autumn') {
+								dataControls.start = `23.09.${datapoint_year}`;
+								dataControls.end = `20.12.${datapoint_year}`;
+							}
+							console.log(datapoint_split[0])
+							dataControls.interval = 'day';
+							updateData();
 						}
 					}
 				}
 			}
 		});
-
 
 		// Setup subscription to the store
 		const unsubscribe = dataStore.subscribe((data) => {
@@ -149,12 +167,12 @@
 
 		for (let year = startYear; year <= endYear; year++) {
 			seasons.forEach((season, index) => {
-			allSeasons.push(`${year}${index + 1}${season}`);
+				allSeasons.push(`${year}${index + 1}${season}`);
 			});
 		}
 
 		return allSeasons;
-		};
+	};
 
 	const fillMissingData = (data) => {
 		const firstYear = parseInt(data[0].season.substring(0, 4));
@@ -169,22 +187,31 @@
 	};
 
 	function updateChart(data) {
-		console.log(data)
+		console.log(data);
 		if (chart && data) {
-			if (dataControls.interval == "season") {
+			if (dataControls.interval == 'season') {
 				data = fillMissingData(data);
-				let labels = data.map(d => {
+				let labels = data.map((d) => {
 					let seasonCode = d.season.substring(5, d.season.length);
 					let year = d.season.substring(0, 4);
 					let season;
-					switch(seasonCode) {
-					case 'spring': season = 'Spring'; break;
-					case 'summer': season = 'Sommer'; break;
-					case 'autumn': season = 'Herbst'; break;
-					case 'winter': season = 'Winter'; break;
-					default: season = 'Unbekannt';
-				}
-				return `${season} ${year}`;
+					switch (seasonCode) {
+						case 'spring':
+							season = 'Spring';
+							break;
+						case 'summer':
+							season = 'Summer';
+							break;
+						case 'autumn':
+							season = 'Autumn';
+							break;
+						case 'winter':
+							season = 'Winter';
+							break;
+						default:
+							season = 'Unbekannt';
+					}
+					return `${season} ${year}`;
 				});
 
 				chart.data.labels = labels;
@@ -192,12 +219,11 @@
 				chart.data.datasets[1].data = data.map((row) => row.TMIN);
 				chart.options.scales.x = {};
 				chart.update();
-				
 			} else {
 				chart.data.labels = data.map((row) => row.date);
 				chart.data.datasets[0].data = data.map((row) => row.TMAX);
 				chart.data.datasets[1].data = data.map((row) => row.TMIN);
-				chart.options.scales.x = {type:"time"};
+				chart.options.scales.x = { type: 'time' };
 				chart.update();
 			}
 		}
