@@ -23,23 +23,21 @@
 	let chartElement;
 	let chart;
 
+
 	let dataControls: DataSettings = {
 		interval: $dataSettings.interval
 	};
 
 	let intervals = [
 		{ value: 'year', label: 'Year', disabled: false },
-		{ value: 'season', label: 'Season', disabled: true },
+		{ value: 'season', label: 'Season', disabled: false },
 		{ value: 'month', label: 'Month', disabled: false },
 		{ value: 'day', label: 'Day', disabled: false }
 	];
 
-	let seletedInterval
-
 	$: selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
 
 	onMount(() => {
-		// Init empty chart
 		chart = new Chart(chartElement, {
 			type: 'line',
 			data: {
@@ -131,9 +129,12 @@
 			}
 		});
 
+
 		// Setup subscription to the store
 		const unsubscribe = dataStore.subscribe((data) => {
-			updateChart(data.data);
+			if (!data.loading) {
+				updateChart(data.data);
+			}
 		});
 
 		// Cleanup on component destroy
@@ -143,20 +144,70 @@
 		};
 	});
 
+	const generateSeasons = (startYear: number, endYear: number): string[] => {
+		const seasons = ['winter', 'spring', 'summer', 'autumn'];
+		const allSeasons: string[] = [];
+
+		for (let year = startYear; year <= endYear; year++) {
+			seasons.forEach((season, index) => {
+			allSeasons.push(${year}${index + 1}${season});
+			});
+		}
+
+		return allSeasons;
+		};
+
+	const fillMissingData = (data) => {
+		const firstYear = parseInt(data[0].season.substring(0, 4));
+		const lastYear = parseInt(data[data.length - 1].season.substring(0, 4));
+
+		const allSeasons = generateSeasons(firstYear, lastYear);
+
+		return allSeasons.map((season) => {
+			const existingData = data.find((d) => d.season === season);
+			return existingData ? existingData : { season };
+		});
+	};
+
 	function updateChart(data) {
+		console.log(data)
 		if (chart && data) {
-			chart.data.labels = data.map((row) => row.date);
-			chart.data.datasets[0].data = data.map((row) => row.TMAX);
-			chart.data.datasets[1].data = data.map((row) => row.TMIN);
-			chart.update();
+			if (dataControls.interval == "season") {
+				data = fillMissingData(data);
+				let labels = data.map(d => {
+					let seasonCode = d.season.substring(5, d.season.length);
+					let year = d.season.substring(0, 4);
+					let season;
+					switch(seasonCode) {
+					case 'spring': season = 'Spring'; break;
+					case 'summer': season = 'Sommer'; break;
+					case 'autumn': season = 'Herbst'; break;
+					case 'winter': season = 'Winter'; break;
+					default: season = 'Unbekannt';
+				}
+				return `${season} ${year}`;
+				});
+
+				chart.data.labels = labels;
+				chart.data.datasets[0].data = data.map((row) => row.TMAX);
+				chart.data.datasets[1].data = data.map((row) => row.TMIN);
+				chart.options.scales.x = {};
+				chart.update();
+				
+			} else {
+				chart.data.labels = data.map((row) => row.date);
+				chart.data.datasets[0].data = data.map((row) => row.TMAX);
+				chart.data.datasets[1].data = data.map((row) => row.TMIN);
+				chart.options.scales.x = {type:"time"};
+				chart.update();
+			}
 		}
 	}
 
 	function updateData() {
-		console.log(dataControls);
 		let settings: DataSettings = { interval: dataControls.interval };
 		let dateParser = /(\d{1,2}).(\d{1,2}).(\d{4})/;
-
+		dataSettings.setSettings(settings);
 		if (dataControls.start) {
 			let start = new Date(dataControls.start.replace(dateParser, '$3-$2-$1'));
 			settings.start = start.toISOString().split('T')[0];
@@ -167,7 +218,6 @@
 			settings.end = end.toISOString().split('T')[0];
 			dataControls.end = end.toLocaleDateString('de-DE');
 		}
-		dataSettings.setSettings(settings);
 		dataStore.fetchTemperatureData($currentStation.id);
 	}
 
@@ -252,6 +302,7 @@
 		<div class="relative h-full max-h-96 w-full">
 			<LoadingOverlay loading={$dataStore.loading} noData={$dataStore.data.length == 0}
 			></LoadingOverlay>
+
 			<canvas bind:this={chartElement}></canvas>
 		</div>
 	</div>

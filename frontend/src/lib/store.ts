@@ -18,6 +18,7 @@ function createDataStore() {
 			try {
 				const $dataSettings = get(dataSettings);
 				let dataUrl = `${API_URL}/data/${id}/${$dataSettings.interval}`;
+				
 
 				if ($dataSettings.start && $dataSettings.end) {
 					dataUrl += `?start=${$dataSettings.start}&end=${$dataSettings.end}`;
