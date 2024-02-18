@@ -34,7 +34,7 @@ function createDataStore() {
 				set({ data: data, loading: false, error: null });
 			} catch (error) {
 				set({ data: [], loading: false, error: error });
-				toast(error.message);
+				toast.error(error.message);
 			}
 		}
 	};
@@ -75,16 +75,19 @@ function createStationListStore() {
 			}
 
 			const data = await response.json();
+			
+			toast('Found ' + data.length + ' stations')
 			set({ data: data, loading: false, error: null });
 		} catch (error) {
 			set({ data: [], loading: false, error: error });
-			toast(error.message);
+			toast.error(error.message);
 		}
 	}
 
 	return {
 		subscribe,
 		fetchStationsByCoords: async (lat, lng, radius, start?, end?, maxStations?) => {
+			update((state) => ({ ...state, loading: true, error: null }));
 			let url = `${API_URL}/stations`;
 			url += `?latitude=${lat}&longitude=${lng}&radius=${radius}`;
 			if (start) url += `&start=${start}`;
@@ -117,7 +120,6 @@ function createCurrentStationStore() {
 	return {
 		subscribe,
 		setCurrentStation: async (station) => {
-			toast(`Loading data for ${station.name}`);
 			set(station);
 		},
 		clearCurrentStation: () => {

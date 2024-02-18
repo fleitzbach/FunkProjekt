@@ -38,7 +38,6 @@
 	let endYear;
 	let searchByCoordinates = true;
 	$: handleThemeChange($mode);
-	let dataLoading = false;
 	let searchName = '';
 	let selectionMarker;
 	let selectionMarkerIcon;
@@ -87,7 +86,6 @@
 			coordinates = `${lat}, ${lng}`;
 			selectionMarker = L.marker([lat, lng], { icon: selectionMarkerIcon, interactive: false });
 			selectionMarker.addTo(map);
-			toast(`Added coordinates (${lat}, ${lng}) to search-panel.`);
 		}
 	}
 
@@ -196,14 +194,12 @@
 	});
 
 	async function search(e) {
-		dataLoading = true;
 		const lat = parseFloat(latitude);
 		const lng = parseFloat(longitude);
 
 		if (searchByCoordinates) {
 			if (isNaN(lat) || isNaN(lng)) {
-				toast('Please enter valid coordinates.');
-				dataLoading = false;
+				toast.warning('Please enter valid coordinates.');
 				return;
 			}
 
@@ -227,15 +223,13 @@
 
 		} else {
 			if (!searchName) {
-				toast('Please enter a station name.');
-				dataLoading = false;
+				toast.warning('Please enter a station name.');
 				return;
 			}
 
 			circle.remove();
 			stationList.fetchStationsByName(searchName);
 		}
-		dataLoading = true;
 	}
 
 	function updateMarkers(stations) {
@@ -258,7 +252,6 @@
 		if (searchByCoordinates === false) {
 			map.fitBounds(markers.getBounds());
 		}
-		dataLoading = false;
 	}
 
 	function updateCircle(lat, lng, radius) {
@@ -330,7 +323,7 @@
 					</div>
 				{/if}
 
-				<Button type="button" disabled={dataLoading} class="w-24" on:click={search}>
+				<Button type="button" disabled={$stationList.loading} class="w-24" on:click={search}>
 					{#if $stationList.loading}
 						<svg
 							width="24"
@@ -409,7 +402,7 @@
 		{/if}
 	</Tabs.Root>
 
-	<Toaster />
+	<Toaster richColors={true}/>
 </main>
 <ModeWatcher />
 
