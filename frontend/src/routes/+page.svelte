@@ -161,7 +161,7 @@
 			iconSize: [32, 32],
 			iconAnchor: [16, 32],
 			popupAnchor: [0, -16],
-			className: 'drop-shadow fill-accent dark:fill-primary'
+			className: 'drop-shadow fill-primary'
 		});
 
 		selectionMarkerIcon = new L.divIcon({
