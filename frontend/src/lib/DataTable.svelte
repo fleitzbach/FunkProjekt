@@ -12,9 +12,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
 	import { dataStore, stationList} from './store';
-	import 
-
-	console.log(dataStore)
 
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
 

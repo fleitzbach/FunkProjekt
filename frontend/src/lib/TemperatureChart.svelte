@@ -196,22 +196,14 @@
 					let seasonCode = d.season.substring(5, d.season.length);
 					let year = d.season.substring(0, 4);
 					let season;
-					switch (seasonCode) {
-						case 'spring':
-							season = 'Spring';
-							break;
-						case 'summer':
-							season = 'Summer';
-							break;
-						case 'autumn':
-							season = 'Autumn';
-							break;
-						case 'winter':
-							season = 'Winter';
-							break;
-						default:
-							season = 'Unbekannt';
-					}
+					const seasonMap = {
+						'spring': 'Spring',
+						'summer': 'Summer',
+						'autumn': 'Autumn',
+						'winter': 'Winter',
+					};
+
+					season = seasonMap[seasonCode];
 					return `${season} ${year}`;
 				});
 
