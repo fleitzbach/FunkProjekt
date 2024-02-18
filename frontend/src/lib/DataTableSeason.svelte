@@ -12,7 +12,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
 	import { dataStore, stationList} from './store';
-	import 
 
 	console.log(dataStore)
 
@@ -28,8 +27,30 @@
 	});
 	const columns = table.createColumns([
 		table.column({
-			accessor: 'date',
-			header: 'Date'
+			accessor: 'season',
+			header: 'Season',
+			cell: ({ value }) => {
+                    const year = value.substring(0, 4);
+                    const seasonCode = value.substring(5);
+                    let seasonName = '';
+                    switch (seasonCode) {
+                        case 'winter':
+                            seasonName = 'Winter';
+                            break;
+                        case 'spring':
+                            seasonName = 'Spring';
+                            break;
+                        case 'summer':
+                            seasonName = 'Summer';
+                            break;
+                        case 'autumn':
+                            seasonName = 'Autumn';
+                            break;
+                        default:
+                            seasonName = 'Unknown Season';
+                    }
+                    return `${seasonName} ${year}`;
+                },
 		}),
 		table.column({
 			accessor: 'TMIN',
@@ -55,12 +76,14 @@
 	onMount(() => {});
 </script>
 
-<div class="rounded-md flex flex-row h-full min-h-0 min-w-0 max-h-[calc(100%-1.5rem)] overflow-clip">
+<div
+	class="rounded-md flex flex-row h-full min-h-0 min-w-0 max-h-[calc(100%-1.5rem)] overflow-clip"
+>
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
 				<Subscribe rowAttrs={headerRow.attrs()}>
-					<Table.Row class='sticky top-0 bg-background'>
+					<Table.Row class="sticky top-0 bg-background">
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>
