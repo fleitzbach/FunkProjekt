@@ -65,7 +65,7 @@
 		return m;
 	}
 
-	function mapAction(container) {		
+	function mapAction(container) {
 		map = createMap(container);
 
 		map.on('click', onMapClick);
@@ -148,9 +148,6 @@
 			if (!latitude || !longitude) {
 				return;
 			}
-			if (data.data.length === 0) {
-				return;
-			}
 			if (!map) {
 				return;
 			}
@@ -193,19 +190,7 @@
 		}
 	}
 
-	$: if (!searchByCoordinates) {
-		if (selectionMarker) {
-			selectionMarker.setOpacity(0);
-		}
-	} else if (searchByCoordinates) {
-		if (selectionMarker) {
-			selectionMarker.setOpacity(1);
-		}
-	}
-
-	onMount(() => {
-		
-	});
+	onMount(() => {});
 
 	async function search(e) {
 		const lat = parseFloat(latitude);
@@ -263,6 +248,9 @@
 			map.fitBounds(circle.getBounds());
 		}
 		if (searchByCoordinates === false) {
+			if (stations.length === 0) {
+				return;
+			}
 			map.fitBounds(markers.getBounds());
 		}
 	}

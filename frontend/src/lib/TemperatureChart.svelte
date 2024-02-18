@@ -120,7 +120,6 @@
 							dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
 							dataControls.interval = 'day';
 							updateData();
-
 						} else if (dataControls.interval == 'season') {
 							console.log(dataPoint);
 							let datapoint_split = dataPoint.split(' ');
@@ -139,7 +138,7 @@
 								dataControls.start = `23.09.${datapoint_year}`;
 								dataControls.end = `20.12.${datapoint_year}`;
 							}
-							console.log(datapoint_split[0])
+							console.log(datapoint_split[0]);
 							dataControls.interval = 'day';
 							updateData();
 						}
@@ -196,10 +195,10 @@
 					let year = d.season.substring(0, 4);
 					let season;
 					const seasonMap = {
-						'spring': 'Spring',
-						'summer': 'Summer',
-						'autumn': 'Autumn',
-						'winter': 'Winter',
+						spring: 'Spring',
+						summer: 'Summer',
+						autumn: 'Autumn',
+						winter: 'Winter'
 					};
 
 					season = seasonMap[seasonCode];
@@ -297,20 +296,22 @@
 			<div class="flex items-center gap-x-5">
 				<Sheet.Root>
 					<Tooltip.Root>
-						<Tooltip.Trigger>
-							<Sheet.Trigger>
+						<Sheet.Trigger>
+							<Tooltip.Trigger>
 								<Button variant="ghost" class="aspect-square p-0">
 									<LucideArrowUpRightSquare></LucideArrowUpRightSquare>
 								</Button>
-							</Sheet.Trigger>
-						</Tooltip.Trigger>
+							</Tooltip.Trigger>
+						</Sheet.Trigger>
 						<Tooltip.Content class="z-[9999]">Show data as list</Tooltip.Content>
 					</Tooltip.Root>
 					<Sheet.Content class="z-[1000]">
 						<Sheet.Header>
 							<Sheet.Title>List Data</Sheet.Title>
 						</Sheet.Header>
-						{#if $dataSettings.interval === "season"}
+						<LoadingOverlay noData={$dataStore.data.length === 0} backgroundOverlay={false}></LoadingOverlay>
+
+						{#if $dataSettings.interval === 'season'}
 							<Datatableseason></Datatableseason>
 						{:else}
 							<Datatable></Datatable>
