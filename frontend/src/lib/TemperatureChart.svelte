@@ -14,6 +14,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { X } from 'lucide-svelte';
 	import { LucideArrowUpRightSquare } from 'lucide-svelte';
+	import { Undo2 } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import LoadingOverlay from '$lib/LoadingOverlay.svelte';
 	import 'chartjs-adapter-luxon';
@@ -24,9 +25,14 @@
 	let chartElement;
 	let chart;
 
+	let undoUpdate = false;
+
 	let dataControls: DataSettings = {
 		interval: $dataSettings.interval
 	};
+
+	let history: DataSettings[] = [];
+	let lastHistoryElement: DataSettings;
 
 	let intervals = [
 		{ value: 'year', label: 'Year', disabled: false },
@@ -58,6 +64,20 @@
 		},
 		season: {}
 	};
+
+	function undoFiltering() {
+		console.log(history.length);
+		if (history.length == 0) {
+			console.log('leer');
+			return;
+		}
+		console.log(history);
+		dataControls = history.pop();
+		history = [...history];
+
+		undoUpdate = true;
+		updateData();
+	}
 
 	onMount(() => {
 		chart = new Chart(chartElement, {
@@ -148,7 +168,7 @@
 						let datapoint_year = datapoint_split[1];
 
 						if (datapoint_split[0] == 'Winter') {
-							dataControls.start = `21.12.${datapoint_year}`;
+							dataControls.start = `21.12.${datapoint_year - 1}`;
 							dataControls.end = `20.03.${datapoint_year}`;
 						} else if (datapoint_split[0] == 'Spring') {
 							dataControls.start = `21.03.${datapoint_year}`;
@@ -242,6 +262,18 @@
 	}
 
 	function updateData() {
+		console.log(undoUpdate);
+		if (!undoUpdate) {
+			history.push({
+				start: $dataSettings.start,
+				end: $dataSettings.end,
+				interval: $dataSettings.interval
+			});
+			history = [...history];
+			console.log(history)
+		} else {
+			undoUpdate = false;
+		}
 		let settings: DataSettings = { interval: dataControls.interval };
 		let dateParser = /(\d{1,2}).(\d{1,2}).(\d{4})/;
 		dataSettings.setSettings(settings);
@@ -308,7 +340,7 @@
 				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" />
 			</div>
 		</div>
-		<Button on:click={updateData} disabled={$dataStore.loading} class="w-28" >
+		<Button on:click={updateData} disabled={$dataStore.loading} class="w-28">
 			{#if $dataStore.loading}
 				<svg
 					width="24"
@@ -340,6 +372,19 @@
 		<div class="flex flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{$currentStation.name}</h3>
 			<div class="flex items-center gap-x-5">
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						<Button
+							variant="ghost"
+							class="aspect-square p-0"
+							disabled={history.length === 0}
+							on:click={undoFiltering}
+						>
+							<Undo2></Undo2>
+						</Button>
+					</Tooltip.Trigger>
+					<Tooltip.Content class="z-[9999]">Click to undo!</Tooltip.Content>
+				</Tooltip.Root>
 				<Sheet.Root>
 					<Tooltip.Root>
 						<Sheet.Trigger>
