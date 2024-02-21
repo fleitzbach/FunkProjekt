@@ -12,6 +12,7 @@ npm install
 ## Start (dev Server)
 
 ```
+(im frontend Ordner)
 npm run dev
 cd ../backend
 uvicorn main:app --reload
