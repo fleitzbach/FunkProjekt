@@ -11,12 +11,11 @@
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
-	import { dataStore, stationList} from './store';
+	import { dataStore, stationList } from './store';
 
-	console.log(dataStore)
+	console.log(dataStore);
 
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
-
 
 	const table = createTable(tableData, {
 		sort: addSortBy({ disableMultiSort: true }),
@@ -30,27 +29,27 @@
 			accessor: 'season',
 			header: 'Season',
 			cell: ({ value }) => {
-                    const year = value.substring(0, 4);
-                    const seasonCode = value.substring(5);
-                    let seasonName = '';
-                    switch (seasonCode) {
-                        case 'winter':
-                            seasonName = 'Winter';
-                            break;
-                        case 'spring':
-                            seasonName = 'Spring';
-                            break;
-                        case 'summer':
-                            seasonName = 'Summer';
-                            break;
-                        case 'autumn':
-                            seasonName = 'Autumn';
-                            break;
-                        default:
-                            seasonName = 'Unknown Season';
-                    }
-                    return `${seasonName} ${year}`;
-                },
+				const year = value.substring(0, 4);
+				const seasonCode = value.substring(5);
+				let seasonName = '';
+				switch (seasonCode) {
+					case 'winter':
+						seasonName = 'Winter';
+						break;
+					case 'spring':
+						seasonName = 'Spring';
+						break;
+					case 'summer':
+						seasonName = 'Summer';
+						break;
+					case 'autumn':
+						seasonName = 'Autumn';
+						break;
+					default:
+						seasonName = 'Unknown Season';
+				}
+				return `${seasonName} ${year}`;
+			}
 		}),
 		table.column({
 			accessor: 'TMIN',
@@ -65,7 +64,7 @@
 			cell: ({ value }) => {
 				return value == null ? '–' : value;
 			}
-		}),
+		})
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
@@ -77,13 +76,13 @@
 </script>
 
 <div
-	class="rounded-md flex flex-row h-full min-h-0 min-w-0 max-h-[calc(100%-1.5rem)] overflow-clip"
+	class="flex h-full max-h-[calc(100%-1.5rem)] min-h-0 min-w-0 flex-row overflow-clip rounded-md"
 >
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
 				<Subscribe rowAttrs={headerRow.attrs()}>
-					<Table.Row class="sticky top-0 bg-background">
+					<Table.Row class="bg-background sticky top-0">
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>

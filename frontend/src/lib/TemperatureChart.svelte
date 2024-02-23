@@ -270,7 +270,7 @@
 				interval: $dataSettings.interval
 			});
 			history = [...history];
-			console.log(history)
+			console.log(history);
 		} else {
 			undoUpdate = false;
 		}
@@ -308,10 +308,10 @@
 	}
 </script>
 
-<div class="w-full flex flex-row bg-primary-foreground">
+<div class="bg-primary-foreground flex w-full flex-row">
 	<!-- Data Controls -->
-	<div class="p-5 flex flex-col gap-5 items-baseline min-w-[300px] max-w-[300px] w-full">
-		<div class="flex flex-row justify-between w-full">
+	<div class="flex w-full min-w-[300px] max-w-[300px] flex-col items-baseline gap-5 p-5">
+		<div class="flex w-full flex-row justify-between">
 			<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Controls</h3>
 			<Button on:click={clearSettings} variant="link" class="p-0 font-normal">clear</Button>
 		</div>

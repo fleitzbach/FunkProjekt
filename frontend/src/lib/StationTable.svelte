@@ -110,7 +110,6 @@
 			accessor: (station) => station,
 			header: '',
 			cell: ({ value }) => {
-
 				return createRender(Button, {
 					variant: 'link',
 					size: 'sm',
@@ -176,17 +175,17 @@
 </div>
 
 <LoadingOverlay noData={$tableData.length == 0} backgroundOverlay={false}></LoadingOverlay>
-<div class="relative rounded-md flex flex-row h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
+<div class="relative flex h-[calc(100%-3.5rem)] min-h-0 flex-row overflow-clip rounded-md">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow (headerRow.id)}
 				<Subscribe rowAttrs={headerRow.attrs()}>
-					<Table.Row class="sticky top-0 bg-background">
+					<Table.Row class="bg-background sticky top-0">
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>
 									{#if cell.id === 'distance'}
-										<Button variant="ghost" class='-mx-4' on:click={props.sort.toggle}>
+										<Button variant="ghost" class="-mx-4" on:click={props.sort.toggle}>
 											<Render of={cell.render()} />
 											<ArrowUpDown class={'ml-2 h-4 w-4'} />
 										</Button>

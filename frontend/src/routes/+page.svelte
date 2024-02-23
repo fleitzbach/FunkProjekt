@@ -263,11 +263,11 @@
 </script>
 
 <main>
-	<Tabs.Root value="map" class="flex flex-col h-full w-full">
-		<div class="relative w-full h-full min-h-0 min-w-0 m-0 flex flex-row">
+	<Tabs.Root value="map" class="flex h-full w-full flex-col">
+		<div class="relative m-0 flex h-full min-h-0 w-full min-w-0 flex-row">
 			<!-- Search settings -->
 			<div
-				class="p-5 flex flex-col gap-5 items-baseline max-w-[300px] w-full min-h-0 h-full overflow-auto"
+				class="flex h-full min-h-0 w-full max-w-[300px] flex-col items-baseline gap-5 overflow-auto p-5"
 			>
 				<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
 				<div>
@@ -354,11 +354,11 @@
 			<Separator orientation="vertical"></Separator>
 
 			<!-- Map View -->
-			<Tabs.Content value="map" id="map-container" class="relative w-full h-full m-0 ">
+			<Tabs.Content value="map" id="map-container" class="relative m-0 h-full w-full ">
 				<div id="map" class="h-full w-full outline-none" use:mapAction></div>
 				<!-- Zoom Controls -->
-				<div class="absolute top-0 left-0 p-5 z-[1000] flex flex-col gap-2">
-					<Button variant="outline" class="shadow w-10 p-0 bg-background" on:click={map.zoomIn(1)}
+				<div class="absolute left-0 top-0 z-[1000] flex flex-col gap-2 p-5">
+					<Button variant="outline" class="bg-background w-10 p-0 shadow" on:click={map.zoomIn(1)}
 						><svg
 							width="16"
 							height="16"
@@ -370,7 +370,7 @@
 							/></svg
 						></Button
 					>
-					<Button variant="outline" class="shadow w-10 p-0 bg-background" on:click={map.zoomOut(1)}
+					<Button variant="outline" class="bg-background w-10 p-0 shadow" on:click={map.zoomOut(1)}
 						><svg
 							width="16"
 							height="16"
@@ -383,10 +383,10 @@
 				</div>
 			</Tabs.Content>
 			<!-- List View -->
-			<Tabs.Content value="list" class="relative w-full min-w-0 h-full m-0 p-5 box-border">
+			<Tabs.Content value="list" class="relative m-0 box-border h-full w-full min-w-0 p-5">
 				<StationTable></StationTable>
 			</Tabs.Content>
-			<div class="absolute top-0 right-0 p-5 z-[1000]">
+			<div class="absolute right-0 top-0 z-[1000] p-5">
 				<Tabs.List>
 					<Tabs.Trigger value="map">Map</Tabs.Trigger>
 					<Tabs.Trigger value="list">List</Tabs.Trigger>
