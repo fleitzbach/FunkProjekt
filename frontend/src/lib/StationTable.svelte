@@ -7,7 +7,7 @@
 		addHiddenColumns,
 		addSelectedRows
 	} from 'svelte-headless-table/plugins';
-	import { readable, writable, derived } from 'svelte/store';
+	import { readable, get, derived, type Readable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
@@ -15,6 +15,7 @@
 	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
 	import { currentStation, dataStore, stationList } from './store';
 	import LoadingOverlay from './LoadingOverlay.svelte';
+	import type { Station } from './types';
 
 	const tableData = derived(stationList, ($stationList) => $stationList.data);
 
@@ -109,13 +110,14 @@
 			accessor: (station) => station,
 			header: '',
 			cell: ({ value }) => {
+
 				return createRender(Button, {
 					variant: 'link',
 					size: 'sm',
 					class: 'p-0'
 				})
-					.on('click', () => handleButtonClick(value))
-					.slot(value.id);
+					.on('click', () => handleButtonClick($stationList.data[value.id]))
+					.slot('view Data');
 			},
 			plugins: {
 				sort: {
@@ -125,7 +127,7 @@
 		})
 	]);
 
-	function handleButtonClick(station) {
+	function handleButtonClick(station: Station) {
 		currentStation.setCurrentStation(station);
 		dataStore.fetchTemperatureData(station.id);
 	}
