@@ -179,14 +179,14 @@
 <div class="relative rounded-md flex flex-row h-[calc(100%-3.5rem)] min-h-0 overflow-clip">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
-			{#each $headerRows as headerRow}
+			{#each $headerRows as headerRow (headerRow.id)}
 				<Subscribe rowAttrs={headerRow.attrs()}>
 					<Table.Row class="sticky top-0 bg-background">
 						{#each headerRow.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 								<Table.Head {...attrs}>
 									{#if cell.id === 'distance'}
-										<Button variant="ghost" on:click={props.sort.toggle}>
+										<Button variant="ghost" class='-mx-4' on:click={props.sort.toggle}>
 											<Render of={cell.render()} />
 											<ArrowUpDown class={'ml-2 h-4 w-4'} />
 										</Button>
@@ -207,17 +207,7 @@
 						{#each row.cells as cell (cell.id)}
 							<Subscribe attrs={cell.attrs()} let:attrs>
 								<Table.Cell {...attrs} class="[&:has([role=checkbox])]:pl-3">
-									{#if cell.id === 'station'}
-										<div class="capitalize">
-											<Render of={cell.render()} />
-										</div>
-									{:else if cell.id === 'distance'}
-										<div class="px-4">
-											<Render of={cell.render()} />
-										</div>
-									{:else}
-										<Render of={cell.render()} />
-									{/if}
+									<Render of={cell.render()} />
 								</Table.Cell>
 							</Subscribe>
 						{/each}
