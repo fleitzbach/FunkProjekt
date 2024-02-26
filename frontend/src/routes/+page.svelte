@@ -196,6 +196,7 @@
 		const lat = parseFloat(latitude);
 		const lng = parseFloat(longitude);
 
+		// toast.info('Searching for stations at ' + lat + ', ' + lng + ' within ' + radius + ' km');
 		if (searchByCoordinates) {
 			if (isNaN(lat) || isNaN(lng)) {
 				toast.warning('Please enter valid coordinates.');
@@ -264,17 +265,20 @@
 
 <main>
 	<Tabs.Root value="map" class="flex h-full w-full flex-col">
-		<div class="relative m-0 flex h-full min-h-0 w-full min-w-0 flex-row">
+		<div class="relative m-0 flex h-full min-h-0 w-full min-w-0 flex-row flex-grow">
 			<!-- Search settings -->
 			<div
-				class="flex h-full min-h-0 w-full max-w-[300px] flex-col items-baseline gap-5 overflow-auto p-5"
+				class="flex h-full min-h-0 w-full max-w-[320px] flex-col items-baseline overflow-auto"
 			>
-				<h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Search for stations</h3>
-				<div>
-					<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
-					<div class="flex items-center gap-2 py-2">
-						Name
-						<Switch bind:checked={searchByCoordinates}></Switch>
+				<h3 class="text-2xl font-semibold tracking-tight p-5 bg-accent w-full flex flex-row items-center justify-between dark:text-primary text-primary-foreground top-0 sticky z-10">Search for stations
+					<img src="/favicon.png" alt='logo' class='h-8 aspect-square rounded-full'>
+				</h3>
+				<div class='p-5 flex flex-col gap-5'>
+					<div>
+						<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
+						<div class="flex items-center gap-2 py-2">
+							Name
+							<Switch bind:checked={searchByCoordinates}></Switch>
 						Coordinates
 					</div>
 				</div>
@@ -287,15 +291,15 @@
 									<InfoOutlined size={12}></InfoOutlined>
 								</Tooltip.Trigger>
 								<Tooltip.Content
-									>Click anywhere on the <br /> map to set coordinates.</Tooltip.Content
+								>Click anywhere on the <br /> map to set coordinates.</Tooltip.Content
 								>
 							</Tooltip.Root>
 							<Input
-								type="text"
-								bind:value={coordinates}
-								placeholder="Latitude, Longitude"
-								id="coordinates"
-								class=""
+							type="text"
+							bind:value={coordinates}
+							placeholder="Latitude, Longitude"
+							id="coordinates"
+							class=""
 							/>
 						</div>
 						<div class="w-full">
@@ -317,42 +321,43 @@
 						<Label for="radius" class="font-semibold">Max Stations</Label>
 						<SliderWithInput bind:value={maxStations} min={1} max={500}></SliderWithInput>
 					</div>
-				{:else}
+					{:else}
 					<div class="w-full overflow-clip">
 						<Label for="station-name" class="font-semibold">Station Name</Label>
 						<Input type="text" id="station-name" class="w-full" bind:value={searchName} />
 					</div>
-				{/if}
-
-				<Button type="button" disabled={$stationList.loading} class="w-24" on:click={search}>
-					{#if $stationList.loading}
-						<svg
-							width="24"
-							height="24"
-							class="fill-primary-foreground"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-							><path
-								d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-								opacity=".25"
-							/><path
-								d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
-								><animateTransform
-									attributeName="transform"
-									type="rotate"
-									dur="0.75s"
-									values="0 12 12;360 12 12"
-									repeatCount="indefinite"
-								/></path
-							></svg
-						>
-					{:else}
-						Search
 					{/if}
-				</Button>
+					
+					<Button type="button" disabled={$stationList.loading} class="w-24" on:click={search}>
+						{#if $stationList.loading}
+						<svg
+						width="24"
+						height="24"
+						class="fill-primary-foreground"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+						><path
+						d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+						opacity=".25"
+						/><path
+						d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+						><animateTransform
+						attributeName="transform"
+						type="rotate"
+						dur="0.75s"
+						values="0 12 12;360 12 12"
+						repeatCount="indefinite"
+						/></path
+						></svg
+						>
+						{:else}
+						Search
+						{/if}
+					</Button>
+				</div>
 			</div>
 			<Separator orientation="vertical"></Separator>
-
+			
 			<!-- Map View -->
 			<Tabs.Content value="map" id="map-container" class="relative m-0 h-full w-full ">
 				<div id="map" class="h-full w-full outline-none" use:mapAction></div>
