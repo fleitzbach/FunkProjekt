@@ -34,7 +34,7 @@
 			header: 'StationID',
 			plugins: {
 				filter: {
-					exclude: true
+					exclude: false
 				}
 			}
 		}),
@@ -143,7 +143,6 @@
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
 	const hidableCols = [
-		'id',
 		'name',
 		'distance',
 		'latitude',
