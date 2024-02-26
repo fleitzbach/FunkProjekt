@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Chart from 'chart.js/auto';
+	import Chart, { DatasetController } from 'chart.js/auto';
 	import { onMount } from 'svelte';
 	import { dataStore, currentStation, dataSettings } from './store';
 	import { Input } from './components/ui/input';
@@ -21,9 +21,12 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import Datatable from './DataTable.svelte';
 	import Datatableseason from './DataTableSeason.svelte';
+	import { DateTime } from 'luxon';
 
 	let chartElement;
 	let chart;
+
+
 
 	let undoUpdate = false;
 
@@ -123,7 +126,7 @@
 					const dataPoint = this.data.labels[elementIndex];
 					if (dataControls.interval == 'year') {
 						dataControls.start = `01.01.${dataPoint}`;
-						dataControls.end = `30.12.${dataPoint}`;
+						dataControls.end = `31.12.${dataPoint}`;
 						dataControls.interval = 'month';
 						updateData();
 					} else if (dataControls.interval == 'month') {
@@ -261,7 +264,7 @@
 	}
 
 	function parseDate(input) {
-		const regex = /^(?:(\d{2})\.(\d{2})\.(\d{4})|(\d{2})\.(\d{4})|(\d{4}))$/;
+		const regex = /^(?:(\d{1,2})\.(\d{1,2})\.(\d{4})|(\d{1,2})\.(\d{4})|(\d{4}))$/;
 		const matches = input.match(regex);
 
 		if (!matches) {
@@ -269,72 +272,79 @@
 			return null; // Ungültige Eingabe
 		}
 
-		let day, month, year;
+		let date;
 
 		if (matches[1] && matches[2] && matches[3]) {
 			// dd.mm.yyyy Format
-			day = parseInt(matches[1], 10);
-			month = parseInt(matches[2], 10) - 1; // Monate sind 0-basiert in JavaScript
-			year = parseInt(matches[3], 10);
+			date = DateTime.local(
+				parseInt(matches[3], 10),
+				parseInt(matches[2], 10),
+				parseInt(matches[1], 10)
+			);
 		} else if (matches[4] && matches[5]) {
 			// mm.yyyy Format
-			day = 1; // Standardtag auf den ersten des Monats setzen
-			month = parseInt(matches[4], 10) - 1;
-			year = parseInt(matches[5], 10);
+			date = DateTime.local(parseInt(matches[5], 10), parseInt(matches[4], 10), 1);
 		} else if (matches[6]) {
 			// yyyy Format
-			day = 1; // Standardtag
-			month = 0; // Standardmonat (Januar)
-			year = parseInt(matches[6], 10);
+			date = DateTime.local(parseInt(matches[6], 10), 1, 1);
 		}
 
-		return new Date(year, month, day);
+		if(!date || !date.isValid) {
+			toast.warning('Please enter valid date.');
+			return null; // Ungültige Eingabe
+		}
+
+		return date;
 	}
 
 	function updateData() {
 		let start;
 		let end;
 
-		const dateFormat = /^\d{2}\.\d{2}\.\d{4}$/;
-		if (!dateFormat.test(dataControls.start) || !dateFormat.test(dataControls.end)) {
-			console.log('cool');
-		}
-		console.log(undoUpdate);
 		if (!undoUpdate) {
 			history.push({
-				start: $dataSettings.start,
-				end: $dataSettings.end,
-				interval: $dataSettings.interval
-			});
+                start:
+                    $dataSettings.start == null
+                        ? ''
+                        : new Date($dataSettings.start).toLocaleDateString('de-DE'),
+                end:
+                    $dataSettings.end == null 
+                        ? '' 
+                        : new Date($dataSettings.end).toLocaleDateString('de-DE'),
+                interval: $dataSettings.interval
+            });
 			history = [...history];
-			console.log(history);
 		} else {
 			undoUpdate = false;
 		}
 		let settings: DataSettings = { interval: dataControls.interval };
 		dataSettings.setSettings(settings);
 		if (dataControls.start) {
-			start = parseDate(dataControls.start);
-			if (!start) {
+			start = parseDate(dataControls.start); // Stellt sicher, dass parseDate ein Luxon DateTime zurückgibt
+			if (!start.isValid) {
+				// Überprüft die Gültigkeit des Datums mit Luxon
 				return;
 			} else {
-				settings.start = start.toISOString().split('T')[0];
-				dataControls.start = start.toLocaleDateString('de-DE');
+				settings.start = start.toISODate(); // Konvertiert zu ISO Datum (YYYY-MM-DD)
+				dataControls.start = start.toLocaleString(DateTime.DATE_SHORT, {locale: 'de'}); // Lokales Datum im Kurzformat
 			}
 		}
 		if (dataControls.end) {
 			end = parseDate(dataControls.end);
-			if (!end) {
+			if (!end.isValid) {
 				return;
 			} else {
-				settings.end = end.toISOString().split('T')[0];
-				dataControls.end = end.toLocaleDateString('de-DE');
+				settings.end = end.toISODate();
+				dataControls.end = end.toLocaleString(DateTime.DATE_SHORT, {locale: 'de'});
 			}
 		}
-		if (start > end) {
+		if (start && end && start > end) {
+			// Vergleicht Start- und Enddatum
 			toast.warning('End date is before start date.');
 			return;
 		}
+
+		
 
 		dataStore.fetchTemperatureData($currentStation.id);
 	}
@@ -382,11 +392,23 @@
 		<div class="flex flex-row items-center gap-5">
 			<div>
 				<Label for="start" class="font-semibold">Start date</Label>
-				<Input type="text" id="start" bind:value={dataControls.start} class="w-full" placeholder='tt.mm.jjjj' />
+				<Input
+					type="text"
+					id="start"
+					bind:value={dataControls.start}
+					class="w-full"
+					placeholder="tt.mm.jjjj"
+				/>
 			</div>
 			<div>
 				<Label for="end" class="font-semibold">End date</Label>
-				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" placeholder='tt.mm.jjjj' />
+				<Input
+					type="text"
+					id="end"
+					bind:value={dataControls.end}
+					class="w-full"
+					placeholder="tt.mm.jjjj"
+				/>
 			</div>
 		</div>
 		<Button on:click={updateData} disabled={$dataStore.loading} class="w-28">
