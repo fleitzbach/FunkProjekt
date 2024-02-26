@@ -32,7 +32,6 @@
 	};
 
 	let history: DataSettings[] = [];
-	let lastHistoryElement: DataSettings;
 
 	let intervals = [
 		{ value: 'year', label: 'Year', disabled: false },
@@ -261,7 +260,45 @@
 		}
 	}
 
+	function parseDate(input) {
+		const regex = /^(?:(\d{2})\.(\d{2})\.(\d{4})|(\d{2})\.(\d{4})|(\d{4}))$/;
+		const matches = input.match(regex);
+
+		if (!matches) {
+			toast.warning('Please enter valid date.');
+			return null; // Ungültige Eingabe
+		}
+
+		let day, month, year;
+
+		if (matches[1] && matches[2] && matches[3]) {
+			// dd.mm.yyyy Format
+			day = parseInt(matches[1], 10);
+			month = parseInt(matches[2], 10) - 1; // Monate sind 0-basiert in JavaScript
+			year = parseInt(matches[3], 10);
+		} else if (matches[4] && matches[5]) {
+			// mm.yyyy Format
+			day = 1; // Standardtag auf den ersten des Monats setzen
+			month = parseInt(matches[4], 10) - 1;
+			year = parseInt(matches[5], 10);
+		} else if (matches[6]) {
+			// yyyy Format
+			day = 1; // Standardtag
+			month = 0; // Standardmonat (Januar)
+			year = parseInt(matches[6], 10);
+		}
+
+		return new Date(year, month, day);
+	}
+
 	function updateData() {
+		let start;
+		let end;
+
+		const dateFormat = /^\d{2}\.\d{2}\.\d{4}$/;
+		if (!dateFormat.test(dataControls.start) || !dateFormat.test(dataControls.end)) {
+			console.log('cool');
+		}
 		console.log(undoUpdate);
 		if (!undoUpdate) {
 			history.push({
@@ -275,18 +312,30 @@
 			undoUpdate = false;
 		}
 		let settings: DataSettings = { interval: dataControls.interval };
-		let dateParser = /(\d{1,2}).(\d{1,2}).(\d{4})/;
 		dataSettings.setSettings(settings);
 		if (dataControls.start) {
-			let start = new Date(dataControls.start.replace(dateParser, '$3-$2-$1'));
-			settings.start = start.toISOString().split('T')[0];
-			dataControls.start = start.toLocaleDateString('de-DE');
+			start = parseDate(dataControls.start);
+			if (!start) {
+				return;
+			} else {
+				settings.start = start.toISOString().split('T')[0];
+				dataControls.start = start.toLocaleDateString('de-DE');
+			}
 		}
 		if (dataControls.end) {
-			let end = new Date(dataControls.end.replace(dateParser, '$3-$2-$1'));
-			settings.end = end.toISOString().split('T')[0];
-			dataControls.end = end.toLocaleDateString('de-DE');
+			end = parseDate(dataControls.end);
+			if (!end) {
+				return;
+			} else {
+				settings.end = end.toISOString().split('T')[0];
+				dataControls.end = end.toLocaleDateString('de-DE');
+			}
 		}
+		if (start > end) {
+			toast.warning('Start date is after end date.');
+			return;
+		}
+
 		dataStore.fetchTemperatureData($currentStation.id);
 	}
 
@@ -333,11 +382,11 @@
 		<div class="flex flex-row items-center gap-5">
 			<div>
 				<Label for="start" class="font-semibold">Start date</Label>
-				<Input type="text" id="start" bind:value={dataControls.start} class="w-full" />
+				<Input type="text" id="start" bind:value={dataControls.start} class="w-full" placeholder='tt.mm.jjjj' />
 			</div>
 			<div>
 				<Label for="end" class="font-semibold">End date</Label>
-				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" />
+				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" placeholder='tt.mm.jjjj' />
 			</div>
 		</div>
 		<Button on:click={updateData} disabled={$dataStore.loading} class="w-28">
