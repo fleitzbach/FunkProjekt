@@ -75,6 +75,7 @@
 		}
 		console.log(history);
 		dataControls = history.pop();
+		console.log(dataControls);
 		history = [...history];
 
 		undoUpdate = true;
@@ -300,7 +301,6 @@
 	function updateData() {
 		let start;
 		let end;
-
 		if (!undoUpdate) {
 			history.push({
                 start:
