@@ -34,8 +34,8 @@
 	let markerIcon;
 	let _darkMap;
 	let _lightMap;
-	let startYear: number;
-	let endYear: number;
+	let startYear;
+	let endYear;
 	let searchByCoordinates: boolean = true;
 	$: handleThemeChange($mode);
 	let searchName = '';
@@ -195,6 +195,21 @@
 	async function search(e) {
 		const lat = parseFloat(latitude);
 		const lng = parseFloat(longitude);
+
+		let start = parseInt(startYear);
+		let end = parseInt(endYear);
+
+		if (isNaN(start)) {
+			startYear = '';
+		} else {
+			startYear = start;
+		}
+
+		if (isNaN(end)) {
+			endYear = '';
+		} else {
+			endYear = end;
+		}
 
 		// toast.info('Searching for stations at ' + lat + ', ' + lng + ' within ' + radius + ' km');
 		if (searchByCoordinates) {

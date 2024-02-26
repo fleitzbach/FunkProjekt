@@ -332,7 +332,7 @@
 			}
 		}
 		if (start > end) {
-			toast.warning('Start date is after end date.');
+			toast.warning('End date is before start date.');
 			return;
 		}
 
