@@ -72,6 +72,7 @@
 		}
 		console.log(history);
 		dataControls = history.pop();
+		console.log(dataControls);
 		history = [...history];
 
 		undoUpdate = true;
@@ -294,16 +295,16 @@
 	function updateData() {
 		let start;
 		let end;
-
-		const dateFormat = /^\d{2}\.\d{2}\.\d{4}$/;
-		if (!dateFormat.test(dataControls.start) || !dateFormat.test(dataControls.end)) {
-			console.log('cool');
-		}
-		console.log(undoUpdate);
 		if (!undoUpdate) {
 			history.push({
-				start: $dataSettings.start,
-				end: $dataSettings.end,
+				start:
+					$dataSettings.start == null
+						? ''
+						: new Date($dataSettings.start).toLocaleDateString('de-DE'),
+				end:
+					$dataSettings.end == null 
+						? '' 
+						: new Date($dataSettings.end).toLocaleDateString('de-DE'),
 				interval: $dataSettings.interval
 			});
 			history = [...history];
@@ -382,11 +383,23 @@
 		<div class="flex flex-row items-center gap-5">
 			<div>
 				<Label for="start" class="font-semibold">Start date</Label>
-				<Input type="text" id="start" bind:value={dataControls.start} class="w-full" placeholder='tt.mm.jjjj' />
+				<Input
+					type="text"
+					id="start"
+					bind:value={dataControls.start}
+					class="w-full"
+					placeholder="tt.mm.jjjj"
+				/>
 			</div>
 			<div>
 				<Label for="end" class="font-semibold">End date</Label>
-				<Input type="text" id="end" bind:value={dataControls.end} class="w-full" placeholder='tt.mm.jjjj' />
+				<Input
+					type="text"
+					id="end"
+					bind:value={dataControls.end}
+					class="w-full"
+					placeholder="tt.mm.jjjj"
+				/>
 			</div>
 		</div>
 		<Button on:click={updateData} disabled={$dataStore.loading} class="w-28">
