@@ -33,7 +33,7 @@ function createDataStore() {
 				set({ data: data, loading: false, error: null });
 			} catch (error) {
 				set({ data: [], loading: false, error: error });
-				toast.error("Error while fetching temperature data:", {description: error.message});
+				toast.error("Error while fetching temperature data:", { description: error.message });
 			}
 		}
 	};
@@ -60,14 +60,14 @@ export const dataSettings = createDataSettingsStore();
 // Station List Data
 function createStationListStore() {
 	const { subscribe, set, update } = writable({
-		data: <Station[]> [],
+		data: <Station[]>[],
 		loading: false,
 		error: null
 	});
 
 	async function fetchAndUpdate(url) {
 		try {
-			console.log('Fetching station data')
+			//console.log('Fetching station data')
 			update(({ data }) => ({ data, loading: true, error: null }));
 			const response = await fetch(url);
 
@@ -85,7 +85,7 @@ function createStationListStore() {
 			set({ data: data, loading: false, error: null });
 		} catch (error) {
 			set({ data: [], loading: false, error: error });
-			toast.error("Error while fetching station data:", {description: error.message});
+			toast.error("Error while fetching station data:", { description: error.message });
 		}
 	}
 
