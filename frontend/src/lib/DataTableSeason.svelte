@@ -1,19 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { createTable, Render, Subscribe } from 'svelte-headless-table';
-	import {
-		addPagination,
-		addSortBy,
-		addTableFilter,
-		addSelectedRows
-	} from 'svelte-headless-table/plugins';
-	import { readable, writable, derived } from 'svelte/store';
+	import { addSortBy, addTableFilter, addSelectedRows } from 'svelte-headless-table/plugins';
+	import { derived } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
-	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
-	import { dataStore, stationList } from './store';
-
-	console.log(dataStore);
+	import { ArrowUpDown } from 'lucide-svelte';
+	import { dataStore } from './store';
 
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
 
@@ -69,7 +62,6 @@
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
 		table.createViewModel(columns);
-	const { filterValue } = pluginStates.filter;
 	const { selectedDataIds } = pluginStates.select;
 
 	onMount(() => {});

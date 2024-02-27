@@ -1,5 +1,5 @@
 
-import { browser, building, dev, version } from '$app/environment';
+import { dev } from '$app/environment';
 
 let API_URL = 'https://wetter.fhy.re/api';
 
