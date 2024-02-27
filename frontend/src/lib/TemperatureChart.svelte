@@ -28,8 +28,10 @@
 		interval: $dataSettings.interval
 	};
 
+	// Stores history for undo functionality
 	let history: DataSettings[] = [];
 
+	// Define dropdown options
 	let intervals = [
 		{ value: 'year', label: 'Year', disabled: false },
 		{ value: 'season', label: 'Season', disabled: false },
@@ -37,8 +39,10 @@
 		{ value: 'day', label: 'Day', disabled: false }
 	];
 
+	// Computed property to find the selected interval from the predefined intervals
 	$: selectedInterval = intervals.find((interval) => interval.value === dataControls.interval);
 
+	// Defines scale configurations for different intervals on the chart
 	const xScale = {
 		year: {
 			type: 'time',
@@ -61,6 +65,7 @@
 		season: {}
 	};
 
+	// Function to revert the last data filter applied
 	function undoFiltering() {
 		if (history.length == 0) {
 			return;
@@ -148,7 +153,6 @@
 						} else if (datapoint_month === '02') {
 							datapoint_endDay = isLeapYear ? 29 : 28;
 						} else {
-							//console.error('Invalid month:', datapoint_month);
 							return;
 						}
 						dataControls.start = `01.${datapoint_month}.${datapoint_year}`;
@@ -156,7 +160,6 @@
 						dataControls.interval = 'day';
 						updateData();
 					} else if (dataControls.interval == 'season') {
-						//console.log(dataPoint);
 						let datapoint_split = dataPoint.split(' ');
 						let datapoint_year = datapoint_split[1];
 
@@ -173,7 +176,6 @@
 							dataControls.start = `23.09.${datapoint_year}`;
 							dataControls.end = `20.12.${datapoint_year}`;
 						}
-						//console.log(datapoint_split[0]);
 						dataControls.interval = 'day';
 						updateData();
 					}
@@ -196,6 +198,7 @@
 		};
 	});
 
+	// Generates labels for seasons given a start and end year
 	const generateSeasons = (startYear: number, endYear: number): string[] => {
 		const seasons = ['winter', 'spring', 'summer', 'autumn'];
 		const allSeasons: string[] = [];
@@ -209,6 +212,7 @@
 		return allSeasons;
 	};
 
+	// Fills missing data for seasons
 	const fillMissingData = (data) => {
 		const firstYear = parseInt(data[0].season.substring(0, 4));
 		const lastYear = parseInt(data[data.length - 1].season.substring(0, 4));
@@ -221,6 +225,7 @@
 		});
 	};
 
+	// Updates the chart with new data
 	function updateChart(data) {
 		if (chart && data) {
 			chart.options.scales.x = xScale[dataControls.interval];
@@ -254,6 +259,7 @@
 		}
 	}
 
+	// Parses a date string into a DateTime object
 	function parseDate(input) {
 		// regex for date in the format dd.mm.yyyy, mm.yyyy or yyyy
 		const regex = /^(?:(\d{1,2})\.(\d{1,2})\.(\d{4})|(\d{1,2})\.(\d{4})|(\d{4}))$/;
@@ -289,6 +295,7 @@
 		return date;
 	}
 
+	// Updates data according to current settings and fetches new data if necessary
 	function updateData() {
 		let start;
 		let end;
@@ -343,12 +350,14 @@
 		}
 	}
 
+	// Clears input fields
 	function clearSettings() {
 		dataControls = { interval: 'year' };
 		dataSettings.clearSettings();
 		toast('cleared settings');
 	}
 
+	// Closes the chart section
 	function close() {
 		currentStation.clearCurrentStation();
 	}
