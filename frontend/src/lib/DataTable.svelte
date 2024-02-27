@@ -7,7 +7,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown } from 'lucide-svelte';
 	import { dataStore } from './store';
-	import LoadingOverlay from './LoadingOverlay.svelte';
 
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
 
@@ -39,7 +38,7 @@
 		})
 	]);
 
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
+	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates} =
 		table.createViewModel(columns);
 	const { selectedDataIds } = pluginStates.select;
 
