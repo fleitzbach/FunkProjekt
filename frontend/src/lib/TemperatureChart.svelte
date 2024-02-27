@@ -255,12 +255,13 @@
 	}
 
 	function parseDate(input) {
+		// regex for date in the format dd.mm.yyyy, mm.yyyy or yyyy
 		const regex = /^(?:(\d{1,2})\.(\d{1,2})\.(\d{4})|(\d{1,2})\.(\d{4})|(\d{4}))$/;
 		const matches = input.match(regex);
 
 		if (!matches) {
 			toast.warning('Please enter valid date.');
-			return null; // Ungültige Eingabe
+			return null;
 		}
 
 		let date;
@@ -282,7 +283,7 @@
 
 		if (!date || !date.isValid) {
 			toast.warning('Please enter valid date.');
-			return null; // Ungültige Eingabe
+			return null;
 		}
 
 		return date;
@@ -308,13 +309,12 @@
 		let settings: DataSettings = { interval: dataControls.interval };
 		dataSettings.setSettings(settings);
 		if (dataControls.start) {
-			start = parseDate(dataControls.start); // Stellt sicher, dass parseDate ein Luxon DateTime zurückgibt
+			start = parseDate(dataControls.start);
 			if (!start.isValid) {
-				// Überprüft die Gültigkeit des Datums mit Luxon
 				return;
 			} else {
-				settings.start = start.toISODate(); // Konvertiert zu ISO Datum (YYYY-MM-DD)
-				dataControls.start = start.toLocaleString(DateTime.DATE_SHORT, { locale: 'de' }); // Lokales Datum im Kurzformat
+				settings.start = start.toISODate();
+				dataControls.start = start.toLocaleString(DateTime.DATE_SHORT, { locale: 'de' });
 			}
 		}
 		if (dataControls.end) {
@@ -326,8 +326,8 @@
 				dataControls.end = end.toLocaleString(DateTime.DATE_SHORT, { locale: 'de' });
 			}
 		}
+
 		if (start && end && start > end) {
-			// Vergleicht Start- und Enddatum
 			toast.warning('End date is before start date.');
 			return;
 		}
@@ -335,6 +335,7 @@
 		dataStore.fetchTemperatureData($currentStation.id);
 	}
 
+	// needed to internally keep track of the selected interval
 	function intervalChange(option) {
 		let o = option as Option<T>;
 		if (o) {

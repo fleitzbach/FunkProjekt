@@ -1,20 +1,21 @@
 <script lang="ts">
+	import { derived } from 'svelte/store';
+	import * as Table from '$lib/components/ui/table';
+	import { Button } from '$lib/components/ui/button';
+	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import {
 		addSortBy,
 		addTableFilter,
 		addHiddenColumns,
 		addSelectedRows
 	} from 'svelte-headless-table/plugins';
-	import { derived } from 'svelte/store';
-	import * as Table from '$lib/components/ui/table';
-	import { Button } from '$lib/components/ui/button';
-	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
-	import { currentStation, dataStore, stationList } from './store';
 	import LoadingOverlay from './LoadingOverlay.svelte';
+	import { currentStation, dataStore, stationList } from './store';
 	import type { Station } from './types';
 
+	// Derive tableData from dataStore, transforming it into a format suitable for the table.
 	const tableData = derived(stationList, ($stationList) => $stationList.data);
 
 	const table = createTable(tableData, {
