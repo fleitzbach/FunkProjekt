@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import * as L from 'leaflet?client';
 	import 'leaflet/dist/leaflet.css';
 	import 'leaflet.markercluster?client';
@@ -22,61 +21,61 @@
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import StationTable from '$lib/StationTable.svelte';
 	import type { Station } from '$lib/types';
+
 	let map;
 	let circle;
+	let maxStations: number = 100;
+	let markers;
+	let markerIcon;
+	const initialView = [[48, 9], 6];
+
+	let darkMap;
+	let lightMap;
+
 	let coordinates: string;
+	// set latitude and longitude dynamically
 	$: latitude = coordinates?.split(/\,\s*/)[0];
 	$: longitude = coordinates?.split(/\,\s*/)[1];
 	let radius: number = 50;
-	let maxStations: number = 100;
-	let markers;
-	const initialView = [[48, 9], 6];
-	let markerIcon;
-	let _darkMap;
-	let _lightMap;
 	let startYear;
 	let endYear;
 	let searchByCoordinates: boolean = true;
-	$: handleThemeChange($mode);
 	let searchName = '';
+
+	$: handleThemeChange($mode);
 	let selectionMarker;
 	let selectionMarkerIcon;
 
 	function handleThemeChange(mode) {
-		if (_lightMap && _darkMap) {
+		if (lightMap && darkMap) {
 			if (mode === 'dark') {
-				_darkMap.addTo(map);
-				_lightMap.remove();
+				darkMap.addTo(map);
+				lightMap.remove();
 			} else {
-				_lightMap.addTo(map);
-				_darkMap.remove();
+				lightMap.addTo(map);
+				darkMap.remove();
 			}
 		}
 	}
 
-	function createMap(container) {
-		let m = L.map(container, {
+	function mapAction(container) {
+		// initialize map and related components
+		map = L.map(container, {
 			preferCanvas: true,
 			zoomControl: false,
 			maxZoom: 12,
 			minZoom: 3
 		}).setView(...initialView);
 
-		return m;
-	}
-
-	function mapAction(container) {
-		map = createMap(container);
-
 		map.on('click', onMapClick);
 
-		_darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+		darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 			attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
           &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
 			subdomains: 'abcd'
 		});
 
-		_lightMap = L.tileLayer(
+		lightMap = L.tileLayer(
 			'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
 			{
 				attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
@@ -134,8 +133,10 @@
 				});
 			}
 		});
+
 		map.addLayer(markers);
 
+		// listen for map resize
 		const mapResizeObserver = new ResizeObserver((entries) => {
 			for (let entry of entries) {
 				if (map) map.invalidateSize();
@@ -144,6 +145,7 @@
 
 		mapResizeObserver.observe(document.querySelector('#map-container'));
 
+		// subscribe to station list
 		const unsubscribe = stationList.subscribe((data) => {
 			if (!latitude || !longitude) {
 				return;
@@ -155,6 +157,7 @@
 			updateMarkers(data);
 		});
 
+		// cleanup when component is destroyed
 		return {
 			destroy: () => {
 				unsubscribe();
@@ -180,6 +183,7 @@
 		}
 	}
 
+	// hide selection marker when searching by name
 	$: if (!searchByCoordinates) {
 		if (selectionMarker) {
 			selectionMarker.setOpacity(0);
@@ -189,8 +193,6 @@
 			selectionMarker.setOpacity(1);
 		}
 	}
-
-	onMount(() => {});
 
 	async function search(e) {
 		const lat = parseFloat(latitude);
@@ -211,7 +213,6 @@
 			endYear = end;
 		}
 
-		// toast.info('Searching for stations at ' + lat + ', ' + lng + ' within ' + radius + ' km');
 		if (searchByCoordinates) {
 			if (isNaN(lat) || isNaN(lng)) {
 				toast.warning('Please enter valid coordinates.');
@@ -427,13 +428,10 @@
 				</Tabs.List>
 			</div>
 		</div>
+		<!-- show the temperature chart if a station is selected -->
 		{#if $currentStation.id != ''}
 			<Separator orientation="horizontal"></Separator>
-			<!-- <div transition:slide={{ delay: 0, duration: 250, easing: cubicOut, axis: 'y' }} class=""> -->
-			<!-- <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">{selectedStation.name}</h3> -->
-
 			<TemperatureChart></TemperatureChart>
-			<!-- </div> -->
 		{/if}
 	</Tabs.Root>
 
