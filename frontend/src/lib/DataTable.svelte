@@ -1,15 +1,18 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { createTable, Render, Subscribe } from 'svelte-headless-table';
-	import { addSortBy, addTableFilter, addSelectedRows } from 'svelte-headless-table/plugins';
-	import { derived } from 'svelte/store';
-	import * as Table from '$lib/components/ui/table';
-	import { Button } from '$lib/components/ui/button';
-	import { ArrowUpDown } from 'lucide-svelte';
-	import { dataStore } from './store';
+    import { derived } from 'svelte/store';
 
+    import * as Table from '$lib/components/ui/table';
+    import { Button } from '$lib/components/ui/button';
+    import { ArrowUpDown } from 'lucide-svelte';
+	import { addSortBy, addTableFilter, addSelectedRows } from 'svelte-headless-table/plugins';
+	import { createTable, Render, Subscribe } from 'svelte-headless-table';
+
+    import { dataStore } from './store';
+
+	// Derive tableData from dataStore, transforming it into a format suitable for the table.
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
 
+	// Initialize the table with sorting, filtering, and row selection capabilities.
 	const table = createTable(tableData, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
@@ -17,6 +20,8 @@
 		}),
 		select: addSelectedRows()
 	});
+
+	// Define columns with specific configurations for 'date', 'TMIN', and 'TMAX'.
 	const columns = table.createColumns([
 		table.column({
 			accessor: 'date',
@@ -38,11 +43,13 @@
 		})
 	]);
 
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates} =
-		table.createViewModel(columns);
-	const { selectedDataIds } = pluginStates.select;
+    // Create a view model for the table, which includes rows for headers and body, and attributes for table elements.
+    const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+        table.createViewModel(columns);
 
-	onMount(() => {});
+    // Extract selectedDataIds from pluginStates for row selection tracking.
+    const { selectedDataIds } = pluginStates.select;
+
 </script>
 
 <div
