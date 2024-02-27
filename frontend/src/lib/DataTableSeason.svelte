@@ -60,7 +60,7 @@
 		})
 	]);
 
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
+	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates} =
 		table.createViewModel(columns);
 	const { selectedDataIds } = pluginStates.select;
 
