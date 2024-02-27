@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import {
 		addSortBy,
 		addTableFilter,
@@ -132,7 +131,6 @@
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
 		table.createViewModel(columns);
-	// const { pageIndex, hasNextPage, hasPreviousPage } = pluginStates.page;
 	const { hiddenColumnIds } = pluginStates.hide;
 	const { selectedDataIds } = pluginStates.select;
 	const ids = flatColumns.map((col) => col.id);
@@ -141,8 +139,6 @@
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
 	const hidableCols = ['name', 'distance', 'latitude', 'longitude', 'first_year', 'last_year'];
-
-	onMount(() => {});
 </script>
 
 <div class="pb-4">
@@ -205,18 +201,4 @@
 			{/each}
 		</Table.Body>
 	</Table.Root>
-	<!-- <div class="flex items-center justify-end space-x-4 py-4">
-    <Button
-      variant="outline"
-      size="sm"
-      on:click={() => ($pageIndex = $pageIndex - 1)}
-      disabled={!$hasPreviousPage}>Previous</Button
-    >
-    <Button
-      variant="outline"
-      size="sm"
-      disabled={!$hasNextPage}
-      on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
-    >
-  </div> -->
 </div>

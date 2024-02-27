@@ -38,24 +38,7 @@ function createDataStore() {
 		}
 	};
 }
-
 export const dataStore = createDataStore();
-
-function createDataSettingsStore() {
-	const { subscribe, set } = writable<DataSettings>({ interval: 'year' });
-
-	return {
-		subscribe,
-		setSettings: (settings: DataSettings) => {
-			set(settings);
-		},
-		clearSettings: () => {
-			set({ interval: 'year' });
-		}
-	};
-}
-
-export const dataSettings = createDataSettingsStore();
 
 // Station List Data
 function createStationListStore() {
@@ -64,17 +47,16 @@ function createStationListStore() {
 		loading: false,
 		error: null
 	});
-
+	
 	async function fetchAndUpdate(url) {
 		try {
-			//console.log('Fetching station data')
 			update(({ data }) => ({ data, loading: true, error: null }));
 			const response = await fetch(url);
-
+			
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
-
+			
 			const data = await response.json();
 
 			if (data.length === 0) {
@@ -88,7 +70,7 @@ function createStationListStore() {
 			toast.error("Error while fetching station data:", { description: error.message });
 		}
 	}
-
+	
 	return {
 		subscribe,
 		fetchStationsByCoords: async (lat, lng, radius, start?, end?, maxStations?) => {
@@ -97,7 +79,7 @@ function createStationListStore() {
 			if (start) url += `&start=${start}`;
 			if (end) url += `&end=${end}`;
 			if (maxStations) url += `&selection=${maxStations}`;
-
+			
 			await fetchAndUpdate(url);
 		},
 		fetchStationsByName: async (name: string) => {
@@ -109,6 +91,22 @@ function createStationListStore() {
 }
 export const stationList = createStationListStore();
 
+// Data Settings
+function createDataSettingsStore() {
+	const { subscribe, set } = writable<DataSettings>({ interval: 'year' });
+
+	return {
+		subscribe,
+		setSettings: (settings: DataSettings) => {
+			set(settings);
+		},
+		clearSettings: () => {
+			set({ interval: 'year' });
+		}
+	};
+}
+export const dataSettings = createDataSettingsStore();
+
 // Current Station
 function createCurrentStationStore() {
 	const { subscribe, set } = writable<Station>({
@@ -119,7 +117,7 @@ function createCurrentStationStore() {
 		first_year: 0,
 		last_year: 0
 	});
-
+	
 	return {
 		subscribe,
 		setCurrentStation: async (station) => {
@@ -137,5 +135,4 @@ function createCurrentStationStore() {
 		}
 	};
 }
-
 export const currentStation = createCurrentStationStore();
