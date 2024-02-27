@@ -17,10 +17,10 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import TemperatureChart from '$lib/TemperatureChart.svelte';
 	import { stationList, currentStation } from '$lib/store';
-	import InfoOutlined from '$lib/components/themed-icons/InfoOutlined.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import StationTable from '$lib/StationTable.svelte';
 	import type { Station } from '$lib/types';
+	import { Info } from 'lucide-svelte';
 
 	let map;
 	let circle;
@@ -305,7 +305,7 @@
 								<Label for="coordinates" class="font-semibold">Coordinates</Label>
 								<Tooltip.Root>
 									<Tooltip.Trigger class="inline-block">
-										<InfoOutlined size={12}></InfoOutlined>
+										<Info size={12} />
 									</Tooltip.Trigger>
 									<Tooltip.Content
 										>Click anywhere on the <br /> map to set coordinates.</Tooltip.Content
