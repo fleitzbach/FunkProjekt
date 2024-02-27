@@ -1,22 +1,26 @@
 <script lang="ts">
+	import { derived } from 'svelte/store';
+	import { currentStation, dataStore, stationList } from './store';
+	import type { Station } from './types';
+
 	import {
 		addSortBy,
 		addTableFilter,
 		addHiddenColumns,
 		addSelectedRows
 	} from 'svelte-headless-table/plugins';
-	import { derived } from 'svelte/store';
+	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { createTable, Render, Subscribe, createRender } from 'svelte-headless-table';
-	import { currentStation, dataStore, stationList } from './store';
 	import LoadingOverlay from './LoadingOverlay.svelte';
-	import type { Station } from './types';
-
+	
+	// Derive tableData from dataStore and formatting.
 	const tableData = derived(stationList, ($stationList) => $stationList.data);
 
+	// Initialize the table with configuration for sorting, filtering, hiding columns, and row selection.
 	const table = createTable(tableData, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
@@ -26,6 +30,7 @@
 		select: addSelectedRows()
 	});
 
+	// Define the columns for the table, including configuration for filtering and custom cell rendering.
 	let columns = table.createColumns([
 		table.column({
 			accessor: 'id',
@@ -125,15 +130,19 @@
 	]);
 
 	function handleButtonClick(station: Station) {
+		// Function to handle button click in the table, updating the current station and fetching temperature data.
 		currentStation.setCurrentStation(station);
 		dataStore.fetchTemperatureData(station.id);
 	}
 
+	// Use table.createViewModel to extract necessary properties for rendering the table and managing its state.
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
 		table.createViewModel(columns);
 	const { hiddenColumnIds } = pluginStates.hide;
 	const { selectedDataIds } = pluginStates.select;
 	const ids = flatColumns.map((col) => col.id);
+
+	// Setup for managing which columns are hidden.
 	let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
 	$: $hiddenColumnIds = Object.entries(hideForId)
 		.filter(([, hide]) => !hide)

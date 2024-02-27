@@ -9,7 +9,7 @@
 
     import { dataStore } from './store';
 
-	// Derive tableData from dataStore, transforming it into a format suitable for the table.
+	// Derive tableData from dataStore and formatting.
 	const tableData = derived(dataStore, ($dataStore) => $dataStore.data);
 
 	// Initialize the table with sorting, filtering, and row selection capabilities.
