@@ -1,16 +1,12 @@
 <script lang="ts">
-	import Chart, { DatasetController } from 'chart.js/auto';
+	import Chart from 'chart.js/auto';
 	import { onMount } from 'svelte';
 	import { dataStore, currentStation, dataSettings } from './store';
 	import { Input } from './components/ui/input';
 	import { Button } from './components/ui/button';
-	import { API_URL } from '../config';
 	import * as Select from './components/ui/select';
 	import { Label } from './components/ui/label';
-	import { DateField } from './components/ui/date-field';
-	import { Root } from 'postcss';
 	import type { DataSettings } from './types';
-	import { each } from 'chart.js/helpers';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { X } from 'lucide-svelte';
 	import { LucideArrowUpRightSquare } from 'lucide-svelte';
@@ -25,8 +21,6 @@
 
 	let chartElement;
 	let chart;
-
-
 
 	let undoUpdate = false;
 
@@ -68,14 +62,10 @@
 	};
 
 	function undoFiltering() {
-		console.log(history.length);
 		if (history.length == 0) {
-			console.log('leer');
 			return;
 		}
-		console.log(history);
 		dataControls = history.pop();
-		console.log(dataControls);
 		history = [...history];
 
 		undoUpdate = true;
@@ -158,7 +148,7 @@
 						} else if (datapoint_month === '02') {
 							datapoint_endDay = isLeapYear ? 29 : 28;
 						} else {
-							console.error('Invalid month:', datapoint_month);
+							//console.error('Invalid month:', datapoint_month);
 							return;
 						}
 						dataControls.start = `01.${datapoint_month}.${datapoint_year}`;
@@ -166,7 +156,7 @@
 						dataControls.interval = 'day';
 						updateData();
 					} else if (dataControls.interval == 'season') {
-						console.log(dataPoint);
+						//console.log(dataPoint);
 						let datapoint_split = dataPoint.split(' ');
 						let datapoint_year = datapoint_split[1];
 
@@ -183,7 +173,7 @@
 							dataControls.start = `23.09.${datapoint_year}`;
 							dataControls.end = `20.12.${datapoint_year}`;
 						}
-						console.log(datapoint_split[0]);
+						//console.log(datapoint_split[0]);
 						dataControls.interval = 'day';
 						updateData();
 					}
@@ -290,7 +280,7 @@
 			date = DateTime.local(parseInt(matches[6], 10), 1, 1);
 		}
 
-		if(!date || !date.isValid) {
+		if (!date || !date.isValid) {
 			toast.warning('Please enter valid date.');
 			return null; // Ungültige Eingabe
 		}
@@ -303,16 +293,14 @@
 		let end;
 		if (!undoUpdate) {
 			history.push({
-                start:
-                    $dataSettings.start == null
-                        ? ''
-                        : new Date($dataSettings.start).toLocaleDateString('de-DE'),
-                end:
-                    $dataSettings.end == null 
-                        ? '' 
-                        : new Date($dataSettings.end).toLocaleDateString('de-DE'),
-                interval: $dataSettings.interval
-            });
+				start:
+					$dataSettings.start == null
+						? ''
+						: new Date($dataSettings.start).toLocaleDateString('de-DE'),
+				end:
+					$dataSettings.end == null ? '' : new Date($dataSettings.end).toLocaleDateString('de-DE'),
+				interval: $dataSettings.interval
+			});
 			history = [...history];
 		} else {
 			undoUpdate = false;
@@ -326,7 +314,7 @@
 				return;
 			} else {
 				settings.start = start.toISODate(); // Konvertiert zu ISO Datum (YYYY-MM-DD)
-				dataControls.start = start.toLocaleString(DateTime.DATE_SHORT, {locale: 'de'}); // Lokales Datum im Kurzformat
+				dataControls.start = start.toLocaleString(DateTime.DATE_SHORT, { locale: 'de' }); // Lokales Datum im Kurzformat
 			}
 		}
 		if (dataControls.end) {
@@ -335,7 +323,7 @@
 				return;
 			} else {
 				settings.end = end.toISODate();
-				dataControls.end = end.toLocaleString(DateTime.DATE_SHORT, {locale: 'de'});
+				dataControls.end = end.toLocaleString(DateTime.DATE_SHORT, { locale: 'de' });
 			}
 		}
 		if (start && end && start > end) {
@@ -343,8 +331,6 @@
 			toast.warning('End date is before start date.');
 			return;
 		}
-
-		
 
 		dataStore.fetchTemperatureData($currentStation.id);
 	}

@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import {
-		addPagination,
 		addSortBy,
 		addTableFilter,
 		addHiddenColumns,
 		addSelectedRows
 	} from 'svelte-headless-table/plugins';
-	import { readable, get, derived, type Readable } from 'svelte/store';
+	import { derived } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowUpDown, ChevronDown } from 'lucide-svelte';
@@ -134,7 +133,6 @@
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns, rows } =
 		table.createViewModel(columns);
 	// const { pageIndex, hasNextPage, hasPreviousPage } = pluginStates.page;
-	const { filterValue } = pluginStates.filter;
 	const { hiddenColumnIds } = pluginStates.hide;
 	const { selectedDataIds } = pluginStates.select;
 	const ids = flatColumns.map((col) => col.id);
@@ -142,14 +140,7 @@
 	$: $hiddenColumnIds = Object.entries(hideForId)
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
-	const hidableCols = [
-		'name',
-		'distance',
-		'latitude',
-		'longitude',
-		'first_year',
-		'last_year'
-	];
+	const hidableCols = ['name', 'distance', 'latitude', 'longitude', 'first_year', 'last_year'];
 
 	onMount(() => {});
 </script>
