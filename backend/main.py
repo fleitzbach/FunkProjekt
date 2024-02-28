@@ -7,6 +7,8 @@ import station_data
 import weather_data
 from fastapi.middleware.cors import CORSMiddleware
 
+# geschrieben von Benjamin Hafenscher
+
 app = FastAPI()
 
 origins = [

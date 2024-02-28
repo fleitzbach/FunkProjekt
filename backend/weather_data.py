@@ -7,6 +7,7 @@ from datetime import datetime
 import time
 
 def get_data_from_id(id:str) -> pd.DataFrame:
+    #geschrieben von Arthur Kusmin
     """gets Data from a given id
     
     Keyword arguments:
@@ -31,6 +32,7 @@ def get_data_from_id(id:str) -> pd.DataFrame:
     return df
 
 def filter_data(df: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
+    #geschrieben von Arthur Kusmin
     """filters the data from a given df
     
     Keyword arguments:
@@ -47,6 +49,7 @@ def filter_data(df: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
     return df
 
 def get_season(date):
+    #geschrieben von Arthur Kusmin
     year = str(date.year)
     seasons = {'spring': pd.date_range(start='21/03/'+year, end='20/06/'+year),
                'summer': pd.date_range(start='21/06/'+year, end='22/09/'+year),
@@ -61,6 +64,7 @@ def get_season(date):
         return year + '1winter' 
 
 def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
+    #geschrieben von Arthur Kusmin
     """calculates the mean of the data from a given df
     
     Keyword arguments:
@@ -90,6 +94,7 @@ def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     return df
 
 def get_weather_data(id: str, start: str, end: str, rythm: str) -> pd.DataFrame:
+    #geschrieben von Arthur Kusmin
     """gets the weather data from a given id
     
     Keyword arguments:

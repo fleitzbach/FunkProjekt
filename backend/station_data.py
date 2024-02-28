@@ -7,6 +7,7 @@ import time
 import numpy as np
 
 def _get_stations_() -> pd.DataFrame:
+    # geschrieben von Florian Müller
     """gets all stations
 
     Return: df with id and name
@@ -26,6 +27,7 @@ def _get_stations_() -> pd.DataFrame:
     return df
 
 def _get_inventory_() -> pd.DataFrame:
+    # geschrieben von Florian Müller
     """gets the inventory of all stations
     
     Return: df with id, element, first_year and last_year
@@ -49,6 +51,7 @@ def _get_inventory_() -> pd.DataFrame:
     return df
 
 def load_stations() -> None:
+    # geschrieben von Florian Müller
     """loads stations and inventory and saves it in a csv file"""
     df_stations = _get_stations_()
     df_inventory = _get_inventory_()
@@ -58,6 +61,7 @@ def load_stations() -> None:
     df.to_csv('stations.csv', index=False)
 
 def _get_combine_stations_and_inventory_() -> pd.DataFrame:
+    #geschrieben von David Prädel
     """combines stations and inventory and saves it in a csv file
     
     Return: df with id, name, latitude, longitude, element, first_year and last_year
@@ -73,6 +77,7 @@ def _get_combine_stations_and_inventory_() -> pd.DataFrame:
     return df
 
 def calculate_distances(df, latitude, longitude):
+    #geschrieben von David Prädel
     # Umrechnung von Grad zu Radian
     lat1, lon1, lat2, lon2 = map(np.radians, [latitude, longitude, df['latitude'], df['longitude']])
 
@@ -88,6 +93,7 @@ def calculate_distances(df, latitude, longitude):
     return df
 
 def get_stations(latitude: float, longitude: float, radius: float, start: int , end: int, selection: int = None) -> pd.DataFrame:
+    #geschrieben von David Prädel
     #start_time = time.time()
     df = _get_combine_stations_and_inventory_()
     #print("get_combined: --- %s seconds ---" % (time.time() - start_time))
@@ -108,6 +114,7 @@ def get_stations(latitude: float, longitude: float, radius: float, start: int , 
     return df
     
 def get_station_by_name(name: str) -> pd.DataFrame:
+    #geschrieben von David Prädel
     """gets all stations with a given name
     
     Keyword arguments:
