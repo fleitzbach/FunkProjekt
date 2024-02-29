@@ -15,7 +15,7 @@ def get_data_from_id(id:str) -> pd.DataFrame:
     """
     
     # URL zur gz-Datei
-    url_weather_data = f"https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/{id}.csv.gz"
+    url_weather_data = f"https://noaa-ghcn-pds.s3.amazonaws.com/csv.gz/by_station/{id}.csv.gz"
 
     response = requests.get(url_weather_data)
     compressed_file = BytesIO(response.content)
