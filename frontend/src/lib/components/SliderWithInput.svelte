@@ -20,14 +20,17 @@
 	// Function to handle input change
 	function handleInputChange(event) {
 		const newValue = parseFloat(event.target.value);
+		
+		// if the input is not a number, reset the input value to the current value
 		if (isNaN(newValue)) {
 			event.target.value = internalSliderValue[0];
 			return;
 		}
 		value = internalSliderValue[0]; 
+
 		if (!isNaN(newValue) && newValue !== internalSliderValue[0]) {
 			internalSliderValue = [newValue];
-			value = newValue; // Update the external value
+			value = newValue;
 		}
 	}
 
