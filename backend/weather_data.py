@@ -50,23 +50,22 @@ def filter_data(df: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
 
 def get_season(date):
     #geschrieben von Arthur Kusmin
-    year = str(date.year)
-    seasons = {'spring': pd.date_range(start='21/03/'+year, end='20/06/'+year),
-               'summer': pd.date_range(start='21/06/'+year, end='22/09/'+year),
-               'autumn': pd.date_range(start='23/09/'+year, end='20/12/'+year),
-               'winter_next': pd.date_range(start='21/12/'+year, end='31/12/'+year),
-               'winter_this': pd.date_range(start='01/01/'+year, end='20/03/'+year)}
-    
-    if date in seasons['spring']:
-        return year + '2spring' 
-    elif date in seasons['summer']:
-        return year + '3summer' 
-    elif date in seasons['autumn']:
-        return year + '4autumn' 
-    elif date in seasons['winter_next']:
-        return str(int(year)+1) + '1winter' 
-    elif date in seasons['winter_this']:
-        return year + '1winter' 
+    month = date.month
+    day = date.day
+
+    if (month > 3 or (month == 3 and day >= 21)) and (month < 6 or (month == 6 and day < 21)):
+        season = '2spring'
+    elif (month > 6 or (month == 6 and day >= 21)) and (month < 9 or (month == 9 and day < 23)):
+        season = '3summer'
+    elif (month > 9 or (month == 9 and day >= 23)) and (month < 12 or (month == 12 and day < 21)):
+        season = '4autumn'
+    else:
+        if month == 12:
+            return str(date.year + 1) + '1winter'
+        else:
+            return str(date.year) + '1winter'
+
+    return str(date.year) + season
 
 def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
     #geschrieben von Arthur Kusmin
