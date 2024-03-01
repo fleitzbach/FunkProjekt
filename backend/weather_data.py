@@ -25,7 +25,7 @@ def get_data_from_id(id:str) -> pd.DataFrame:
     df = pd.read_csv(decompressed_file, header=None, names=['id', 'date', 'element', 'data_value','m-flag', 'q-flag', 's-flag', 'obs-time'], usecols=['date', 'element', 'data_value'], dtype={'data_value': float})
     df = df.loc[(df['element'] == 'TMAX') | (df['element'] == 'TMIN')]
     df = df[['date', 'element', 'data_value']]
-    df['data_value'] = df['data_value'].apply(lambda x: x / 10)
+    df['data_value'] = df['data_value'] / 10
 
     df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
 
@@ -53,14 +53,19 @@ def get_season(date):
     year = str(date.year)
     seasons = {'spring': pd.date_range(start='21/03/'+year, end='20/06/'+year),
                'summer': pd.date_range(start='21/06/'+year, end='22/09/'+year),
-               'autumn': pd.date_range(start='23/09/'+year, end='20/12/'+year)}
+               'autumn': pd.date_range(start='23/09/'+year, end='20/12/'+year),
+               'winter_next': pd.date_range(start='21/12/'+year, end='31/12/'+year),
+               'winter_this': pd.date_range(start='01/01/'+year, end='20/03/'+year)}
+    
     if date in seasons['spring']:
         return year + '2spring' 
-    if date in seasons['summer']:
+    elif date in seasons['summer']:
         return year + '3summer' 
-    if date in seasons['autumn']:
+    elif date in seasons['autumn']:
         return year + '4autumn' 
-    else:
+    elif date in seasons['winter_next']:
+        return str(int(year)+1) + '1winter' 
+    elif date in seasons['winter_this']:
         return year + '1winter' 
 
 def calc_mean(df: pd.DataFrame, rythm: str) -> pd.DataFrame:
