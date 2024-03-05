@@ -290,7 +290,7 @@
 					Search for stations
 					<img src="/favicon.png" alt="logo" class="aspect-square h-8 rounded-full" />
 				</h3>
-				<div class="flex flex-col gap-5 p-5">
+				<div class="flex w-full flex-col gap-5 p-5">
 					<div>
 						<Label for="search-by-coordinates" class="font-semibold">Search by</Label>
 						<div class="flex items-center gap-2 py-2">

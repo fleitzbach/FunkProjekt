@@ -198,64 +198,78 @@
 		};
 	});
 
-	// Generates labels for seasons given a start and end year
-	const generateSeasons = (startYear: number, endYear: number): string[] => {
+	const generateSeasons = (startSeason: string, endSeason: string): string[] => {
 		const seasons = ['winter', 'spring', 'summer', 'autumn'];
+		const startYear = parseInt(startSeason.substring(0, 4));
+		const endYear = parseInt(endSeason.substring(0, 4));
+		const startSeasonName = startSeason.slice(5); // Assuming season name starts at index 5
+		const endSeasonName = endSeason.slice(5); // Assuming season name starts at index 5
+		const startSeasonIndex = seasons.indexOf(startSeasonName);
+		const endSeasonIndex = seasons.indexOf(endSeasonName);
+
 		const allSeasons: string[] = [];
 
 		for (let year = startYear; year <= endYear; year++) {
-			seasons.forEach((season, index) => {
-				allSeasons.push(`${year}${index + 1}${season}`);
-			});
+			for (let index = 0; index < seasons.length; index++) {
+				if (year === startYear && index < startSeasonIndex) continue; // Skip seasons before the start season in the first year
+				if (year === endYear && index > endSeasonIndex) break; // Stop adding seasons after the end season in the last year
+				allSeasons.push(`${year}${index + 1}${seasons[index]}`); // Adding 1 to index for the season index
+			}
 		}
 
 		return allSeasons;
 	};
 
-	// Fills missing data for seasons
+	// Fills missing data for seasons given a start and end season
 	const fillMissingData = (data) => {
-		const firstYear = parseInt(data[0].season.substring(0, 4));
-		const lastYear = parseInt(data[data.length - 1].season.substring(0, 4));
-
-		const allSeasons = generateSeasons(firstYear, lastYear);
+		const startSeason = data[0].season;
+		const endSeason = data[data.length - 1].season;
+		const allSeasons = generateSeasons(startSeason, endSeason);
 
 		return allSeasons.map((season) => {
 			const existingData = data.find((d) => d.season === season);
-			return existingData ? existingData : { season };
+			return existingData ? existingData : { season, data: 'missing' }; // Customize as per your data structure
 		});
 	};
 
 	// Updates the chart with new data
 	function updateChart(data) {
-		if (chart && data) {
-			chart.options.scales.x = xScale[dataControls.interval];
-			if (dataControls.interval == 'season') {
-				data = fillMissingData(data);
-				let labels = data.map((d) => {
-					let seasonCode = d.season.substring(5, d.season.length);
-					let year = d.season.substring(0, 4);
-					let season;
-					const seasonMap = {
-						spring: 'Spring',
-						summer: 'Summer',
-						autumn: 'Autumn',
-						winter: 'Winter'
-					};
+		if (!chart) {
+			return;
+		}
+		if (data.length === 0 || data == null) {
+			chart.data.datasets[0].data = [];
+			chart.data.datasets[1].data = [];
+			chart.update();
+			return;
+		}
+		chart.options.scales.x = xScale[dataControls.interval];
+		if (dataControls.interval == 'season') {
+			data = fillMissingData(data);
+			let labels = data.map((d) => {
+				let seasonCode = d.season.substring(5, d.season.length);
+				let year = d.season.substring(0, 4);
+				let season;
+				const seasonMap = {
+					spring: 'Spring',
+					summer: 'Summer',
+					autumn: 'Autumn',
+					winter: 'Winter'
+				};
 
-					season = seasonMap[seasonCode];
-					return `${season} ${year}`;
-				});
+				season = seasonMap[seasonCode];
+				return `${season} ${year}`;
+			});
 
-				chart.data.labels = labels;
-				chart.data.datasets[0].data = data.map((row) => row.TMAX);
-				chart.data.datasets[1].data = data.map((row) => row.TMIN);
-				chart.update();
-			} else {
-				chart.data.labels = data.map((row) => row.date);
-				chart.data.datasets[0].data = data.map((row) => row.TMAX);
-				chart.data.datasets[1].data = data.map((row) => row.TMIN);
-				chart.update();
-			}
+			chart.data.labels = labels;
+			chart.data.datasets[0].data = data.map((row) => row.TMAX);
+			chart.data.datasets[1].data = data.map((row) => row.TMIN);
+			chart.update();
+		} else {
+			chart.data.labels = data.map((row) => row.date);
+			chart.data.datasets[0].data = data.map((row) => row.TMAX);
+			chart.data.datasets[1].data = data.map((row) => row.TMIN);
+			chart.update();
 		}
 	}
 
