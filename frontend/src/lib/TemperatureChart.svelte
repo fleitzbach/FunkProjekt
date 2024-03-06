@@ -120,12 +120,12 @@
 					}
 					const elementIndex = chartElements[0].index;
 					const dataPoint = this.data.labels[elementIndex];
-					if (dataControls.interval == 'year') {
+					if ($dataSettings.interval == 'year') {
 						dataControls.start = `01.01.${dataPoint}`;
 						dataControls.end = `31.12.${dataPoint}`;
 						dataControls.interval = 'month';
 						updateData();
-					} else if (dataControls.interval == 'month') {
+					} else if ($dataSettings.interval == 'month') {
 						let datapoint_split = dataPoint.split('-');
 						let datapoint_year = datapoint_split[0];
 						let datapoint_month = datapoint_split[1];
@@ -159,7 +159,7 @@
 						dataControls.end = `${datapoint_endDay}.${datapoint_month}.${datapoint_year}`;
 						dataControls.interval = 'day';
 						updateData();
-					} else if (dataControls.interval == 'season') {
+					} else if ($dataSettings.interval == 'season') {
 						let datapoint_split = dataPoint.split(' ');
 						let datapoint_year = datapoint_split[1];
 
