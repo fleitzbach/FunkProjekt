@@ -118,7 +118,7 @@
 					size: 'sm',
 					class: 'p-0'
 				})
-					.on('click', () => handleButtonClick($stationList.data[value.id]))
+					.on('click', () => handleButtonClick(value))
 					.slot('view Data');
 			},
 			plugins: {
